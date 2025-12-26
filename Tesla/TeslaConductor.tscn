@@ -1,0 +1,69 @@
+[gd_scene load_steps=8 format=3 uid="uid://dla5i3nu5kpku"]
+
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/TeslaConductor.gd" id="1_5rbsm"]
+[ext_resource type="Texture2D" uid="uid://r7kq7d4ocpbc" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTeslaConductor.png" id="2_aiom4"]
+[ext_resource type="AudioStream" uid="uid://dc5dhug1qu2vn" path="res://Sounds/SoundEffects/Tom/WheelBot/RAM_wheelbotGrenadeImpact.wav" id="5_a88t3"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_spxff"]
+size = Vector2(6, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ebxos"]
+atlas = ExtResource("2_aiom4")
+region = Rect2(0, 0, 8, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yr828"]
+atlas = ExtResource("2_aiom4")
+region = Rect2(8, 0, 8, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nfc8e"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ebxos")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yr828")
+}],
+"loop": true,
+"name": &"Conductor",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"Evil",
+"speed": 5.0
+}]
+
+[node name="Conductor" type="Area2D" groups=["physics projectile"]]
+z_index = 1
+collision_layer = 4
+collision_mask = 4
+script = ExtResource("1_5rbsm")
+
+[node name="CollisionShape2d" type="CollisionShape2D" parent="."]
+position = Vector2(0, -2.735)
+shape = SubResource("RectangleShape2D_spxff")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+light_mask = 2
+position = Vector2(0, -2.735)
+scale = Vector2(1.2, 1.14286)
+sprite_frames = SubResource("SpriteFrames_nfc8e")
+animation = &"Conductor"
+
+[node name="HitSound" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(0, -2.735)
+stream = ExtResource("5_a88t3")
+pitch_scale = 0.5
+attenuation = 1.56917
+bus = &"MainCombat"
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+position = Vector2(0, -2.735)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2d2" type="CollisionShape2D" parent="CharacterBody2D"]
+shape = SubResource("RectangleShape2D_spxff")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
