@@ -1,22 +1,26 @@
 extends "res://Globals/GameManager.gd"
 
-static var tesla_bot = preload("res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/TeslaBot.tscn")
-var spawned
+var spawn_available = true
+var funnykeypressbool
 func spawn_enemy(type: Enemy.EnemyType):
-	type = 12 if not spawned else type
-	spawned = true
+	type = SillyBotsMain.teslabot.index if spawn_available else type
+	spawn_available = false
 	return super.spawn_enemy(type)
 
-func _ready():
-
-	super._ready()
-
-	GameManager.enemy_scenes[12] = tesla_bot
-	ModLoaderLog.error("Mutiny", "TheTimesweeper-SillyBots:Main")
-
-func get_player_skin_paths_for_enemy_type(enemy_type):
+func _physics_process(delta):
+	super._physics_process(delta)
 	
-	match enemy_type:
-		12: return TeslaBot.default_skin_path
+	if Input.is_key_pressed(KEY_B):
+		if !funnykeypressbool:
+			spawn_available = !spawn_available
 
-	return super.get_player_skin_paths_for_enemy_type(enemy_type)
+			ModLoaderLog.error("Next spawn will be " + str(spawn_available), "SillyBots")
+		funnykeypressbool = true
+		
+	if Input.is_key_pressed(KEY_Y):
+		if !funnykeypressbool:
+			start_normal_run()
+		funnykeypressbool = true
+
+	if !Input.is_key_pressed(KEY_Y) && !Input.is_key_pressed(KEY_B):
+		funnykeypressbool = false

@@ -1,14 +1,17 @@
-[gd_scene load_steps=127 format=3 uid="uid://dtbas3s8ymopi"]
+[gd_scene load_steps=131 format=3 uid="uid://dtbas3s8ymopi"]
 
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/TeslaBot.gd" id="1_7qrpf"]
-[ext_resource type="Script" path="res://Scripts/Hosts/ShotgunBot/ShotgunAI.gd" id="2_vteeo"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/TeslaBot.gd" id="1_trbqk"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/TeslaBotAI.gd" id="2_5ejwp"]
 [ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTeslaBot_1.png" id="3_jnx4g"]
 [ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/itesatta_01.wav" id="4_tcden"]
 [ext_resource type="Texture2D" uid="uid://ckwjqiw24vvw5" path="res://Art/Characters/ShotgunnerRAM/Blast 1 40x43.png" id="7_tl15r"]
 [ext_resource type="Texture2D" uid="uid://cb0r386wk7p2p" path="res://Art/Characters/ShotgunnerRAM/New_Blast_40x55.png" id="8_74xpg"]
 [ext_resource type="PackedScene" uid="uid://dhyhd3wcgn6ql" path="res://Scenes/UI/AimIndicatorCircle.tscn" id="9_3qq83"]
+[ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_1.wav" id="10_5attc"]
+[ext_resource type="AudioStream" uid="uid://bqsotfhvwifnq" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_2.wav" id="11_1ogdr"]
 [ext_resource type="AudioStream" uid="uid://tj0puoybw60e" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_SPAWN.wav" id="11_gh88l"]
 [ext_resource type="AudioStream" uid="uid://d3xarhrbppnx8" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_Death.wav" id="12_hc7kf"]
+[ext_resource type="AudioStream" uid="uid://dpxi1vx15rgn7" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_3.wav" id="12_whiix"]
 [ext_resource type="PackedScene" uid="uid://b1ukkyv4lt0np" path="res://Scenes/Hosts/Effects/EnemyFX.tscn" id="13_svnk1"]
 [ext_resource type="Texture2D" uid="uid://kek2465qusef" path="res://Art/Environment/Sci-fi Animations/clear moon sprite.png" id="14_a61hh"]
 [ext_resource type="Texture2D" uid="uid://nmye71xp116l" path="res://Art/Shields/swap shield PEN.png" id="15_x5sck"]
@@ -283,7 +286,7 @@ tracks/2/keys = {
 }
 tracks/3/type = "audio"
 tracks/3/imported = false
-tracks/3/enabled = true
+tracks/3/enabled = false
 tracks/3/path = NodePath("ShootAudio")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
@@ -621,7 +624,18 @@ radius = 16.0
 height = 38.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pj5at"]
-radius = 25.4
+radius = 27.3
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_jn4w2"]
+playback_mode = 1
+random_pitch = 1.4
+streams_count = 3
+stream_0/stream = ExtResource("10_5attc")
+stream_0/weight = 1.0
+stream_1/stream = ExtResource("11_1ogdr")
+stream_1/weight = 1.0
+stream_2/stream = ExtResource("12_whiix")
+stream_2/weight = 1.0
 
 [sub_resource type="AtlasTexture" id="2"]
 atlas = ExtResource("14_a61hh")
@@ -1168,12 +1182,12 @@ anim_speed_max = 0.73
 [node name="TeslaBot" type="CharacterBody2D" groups=["enemy", "enemylike", "host"]]
 z_index = 80
 collision_mask = 264
-script = ExtResource("1_7qrpf")
+script = ExtResource("1_trbqk")
 ignore_skin = true
 skip_spawn_animation = true
 
 [node name="AI" type="Node2D" parent="."]
-script = ExtResource("2_vteeo")
+script = ExtResource("2_5ejwp")
 
 [node name="Sights" type="Line2D" parent="."]
 visible = false
@@ -1265,6 +1279,9 @@ attenuation = 1.93187
 bus = &"Spawn"
 
 [node name="ShootAudio" type="AudioStreamPlayer2D" parent="."]
+
+[node name="ShootAudio2" type="AudioStreamPlayer2D" parent="."]
+stream = SubResource("AudioStreamRandomizer_jn4w2")
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.25

@@ -17,9 +17,12 @@ var init_lifetime = 20
 # bit unintuitively used when spawning
 static var distance = 69
 
+var deployable_owner
+
 # assigned when spawning
 var destination
 
+var remainingHits = 1
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	instances_list.append(self)
@@ -43,6 +46,10 @@ func _ready():
 func _exit_tree():
 	instances_list.erase(self)
 	
+func take_hit():
+	remainingHits -=1
+	if remainingHits <= 0:
+		queue_free()
 # # Called every frame. 'delta' is the elapsed time since the previous frame.
 # func _process(delta):
 # 	pass

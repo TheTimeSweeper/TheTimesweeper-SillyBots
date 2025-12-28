@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://dla5i3nu5kpku"]
+[gd_scene load_steps=10 format=3 uid="uid://dla5i3nu5kpku"]
 
 [ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/TeslaConductor.gd" id="1_5rbsm"]
 [ext_resource type="Texture2D" uid="uid://r7kq7d4ocpbc" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTeslaConductor.png" id="2_aiom4"]
+[ext_resource type="Texture2D" uid="uid://x424pdegjibw" path="res://Art/Characters/level2boss/ShieldCircles/Circle_44.png" id="3_tttnc"]
 [ext_resource type="AudioStream" uid="uid://dc5dhug1qu2vn" path="res://Sounds/SoundEffects/Tom/WheelBot/RAM_wheelbotGrenadeImpact.wav" id="5_a88t3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spxff"]
@@ -34,6 +35,9 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_4slp6"]
+radius = 100.7
+
 [node name="Conductor" type="Area2D" groups=["physics projectile"]]
 z_index = 1
 collision_layer = 4
@@ -43,6 +47,7 @@ script = ExtResource("1_5rbsm")
 [node name="CollisionShape2d" type="CollisionShape2D" parent="."]
 position = Vector2(0, -2.735)
 shape = SubResource("RectangleShape2D_spxff")
+disabled = true
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 light_mask = 2
@@ -50,6 +55,12 @@ position = Vector2(0, -2.735)
 scale = Vector2(1.2, 1.14286)
 sprite_frames = SubResource("SpriteFrames_nfc8e")
 animation = &"Conductor"
+
+[node name="Sprite2D" type="Sprite2D" parent="AnimatedSprite2D"]
+modulate = Color(0, 1, 1, 0.188235)
+position = Vector2(0, 2.39312)
+scale = Vector2(3.78788, 3.97726)
+texture = ExtResource("3_tttnc")
 
 [node name="HitSound" type="AudioStreamPlayer2D" parent="."]
 position = Vector2(0, -2.735)
@@ -65,5 +76,9 @@ collision_mask = 0
 
 [node name="CollisionShape2d2" type="CollisionShape2D" parent="CharacterBody2D"]
 shape = SubResource("RectangleShape2D_spxff")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_4slp6")
+disabled = true
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]

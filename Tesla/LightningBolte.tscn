@@ -1,6 +1,6 @@
-[gd_scene load_steps=10 format=3 uid="uid://c46ve8exlfth5"]
+[gd_scene load_steps=10 format=3 uid="uid://bc0ef23vcki5j"]
 
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/LightningBolt.gd" id="1_qhep2"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/LightningBolt.gd" id="1_nxig2"]
 [ext_resource type="Texture2D" uid="uid://b7egio17n6wt6" path="res://Art/GameObjects/ElectricalHazard/ElectricalLines1.png" id="2_8if2e"]
 [ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_1.wav" id="3_g5icq"]
 [ext_resource type="AudioStream" uid="uid://bqsotfhvwifnq" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_2.wav" id="4_rnldg"]
@@ -31,7 +31,7 @@ stream_2/weight = 1.0
 
 [node name="LightningBolt" type="Node2D"]
 z_index = 1
-script = ExtResource("1_qhep2")
+script = ExtResource("1_nxig2")
 travelCurve = SubResource("Curve_x2jil")
 orthogonalCurve = SubResource("Curve_trhyg")
 

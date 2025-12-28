@@ -1,12 +1,14 @@
-extends Enemy
 class_name TeslaBot
+extends Enemy
 
 @onready var muzzle_flash = $MuzzleFlash
 @onready var spawn_audio = $SpawnAudio
 @onready var melee_collider_shape = $MeleeCollider/CollisionShape2D
 @onready var aim_indicator = $AimIndicator
+@onready var shootAudio1 = $ShootAudio
+@onready var shootAudio2 = $ShootAudio2
 
-static var default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
+var default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
 var red_skin_path = "res://Art/Characters/ShotgunnerRAM/Red 63x113.png"
 var blue_skin_path = "res://Art/Characters/ShotgunnerRAM/blue 63x113.png"
 var yellow_skin_path = "res://Art/Characters/ShotgunnerRAM/yellow 63x113.png"
@@ -37,16 +39,20 @@ var facing_offset_position:
 
 var primaryStateMachine
 
-var lightning_damage = 8
+var lightning_damage = 6
+var lightning_damage_final = 12
 static var lightning_travelTime = 0.1
 
-var secondary_base_cooldown = 2
+var secondary_base_cooldown = 0.5
+
+var allowed_conductors = 3
+var thrown_conductors = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
 	primaryStateMachine = SkillStateMachine.new()
-	enemy_type = EnemyType.SHOTGUN
+	enemy_type = SillyBotsMain.teslabot.index
 	if not is_previous_floor_host: max_health = 75
 	accel = 10
 	max_speed = 160
@@ -81,18 +87,20 @@ func misc_update(delta):
 	primaryStateMachine.update(delta)
 
 func player_action():
-	if Input.is_action_pressed("attack1") && not primaryStateMachine.currentState:
+	if Input.is_action_pressed("attack1"):
+		shoot()
+		
+	if Input.is_action_just_pressed("attack2") and special_cooldown < 0:
+		throw_conductor()
+		
+	update_aim_indicators()
+
+func shoot():
+	if not primaryStateMachine.currentState:
 		var state = FireLightning.new()
 		state.selfEnemy = self
 		primaryStateMachine.setState(state)
 		attack_cooldown = state.baseDuration
-		
-	if Input.is_action_just_pressed("attack2") and special_cooldown < 0:
-		throw_conductor()
-		special_cooldown = secondary_base_cooldown
-		
-	update_aim_indicators()
-
 	
 func _on_animation_finished(anim_name):
 	super(anim_name)
@@ -100,13 +108,37 @@ func _on_animation_finished(anim_name):
 		attacking = false
 	
 func throw_conductor():
+	special_cooldown = secondary_base_cooldown
 	attacking = true
 	play_animation("Special")
 	var conductor = conductor_scene.instantiate()
+	thrown_conductors.push_back(conductor)
 	conductor.global_position = facing_offset_position
 	conductor.causality.set_source(self)
 	conductor.destination = global_position + (aim_direction.normalized() * TeslaConductor.distance)
-	get_parent().add_child(conductor)
+
+	if check_conductor_count() > allowed_conductors:
+		kill_conductor()
+
+	Util.set_object_elevation(conductor, Util.elevation_from_z_index(z_index))
+	GameManager.call_deferred('add_entity_to_scene_tree',  conductor, get_parent() , facing_offset_position)
+
+func check_conductor_count():
+	var count = 0
+	for conductor in thrown_conductors:
+		if conductor == null:
+			continue
+		count += 1
+	return count
+
+func kill_conductor():
+	var size = thrown_conductors.size()
+	for i in size:
+		var last = thrown_conductors.pop_front()
+		if last == null:
+			continue
+		last.queue_free()
+		return
 
 func handle_legacy_elite_skins():
 	if 'induction_barrel' in upgrades:
@@ -172,8 +204,8 @@ func update_aim_indicators():
 class FireLightning extends SkillState:
 	var selfEnemy = null
 
-	var interval = 0.1
-	var shots = 6
+	var interval = 0.12
+	var shots = 5
 	var baseDuration = 0.9
 	var maxRange = 300
 
@@ -190,6 +222,10 @@ class FireLightning extends SkillState:
 		shapeCast2D = selfEnemy.get_node("ShapeCast2D")
 		excluded = selfEnemy.get_node('Hitbox')
 		mask = 4 | Util.bullet_collision_layers[selfEnemy.elevation]
+
+		if ControllerIcons._last_input_type == ControllerIcons.InputType.CONTROLLER and selfEnemy.is_player:
+			Input.start_joy_vibration(0, 1, 0.2, baseDuration)
+			
 		if Input.is_key_pressed(KEY_G):
 			shots = 1
 			selfEnemy.lightning_travelTime = 1
@@ -214,7 +250,9 @@ class FireLightning extends SkillState:
 		selfEnemy.attacking = false
 	
 	func shoot_lightning():
-	
+		
+		# selfEnemy.shootAudio2.play()
+
 		var toPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * maxRange)
 
 		var resultCollider
@@ -247,9 +285,6 @@ class FireLightning extends SkillState:
 				resultCollider = shapeCast2D.get_collider(0)
 				resultPosition = shapeCast2D.get_collision_point(0)
 
-		var lightningBolt = lightning_scene.instantiate()
-		selfEnemy.get_parent().add_child(lightningBolt)
-
 		var startpos = selfEnemy.facing_offset_position
 
 		var entity = null
@@ -257,8 +292,17 @@ class FireLightning extends SkillState:
 			if resultCollider.is_in_group('hitbox'):
 				entity = resultCollider.get_parent()
 				resultPosition = entity.global_position
-			if resultCollider is TeslaConductor:
-				entity = resultCollider
-				resultPosition = entity.global_position
+			# if resultCollider is TeslaConductor:
+			# 	entity = resultCollider
+			# 	resultPosition = entity.global_position
+		var params = LightningBoltParams.new()
+		params.source = selfEnemy
+		params.damage = selfEnemy.lightning_damage_final if shotsFired == shots else selfEnemy.lightning_damage 
+		params.travelTime = TeslaBot.lightning_travelTime
+		params.startPosition = startpos
+		params.destination = resultPosition
+		params.target = entity
+		params.remainingBounces = 1
+		params.finalBolt = (shotsFired == shots)
 
-		lightningBolt._fire(selfEnemy, selfEnemy.lightning_damage, selfEnemy.lightning_travelTime, startpos, resultPosition, entity, 1)
+		SillyViolence.fire_lightning(params)
