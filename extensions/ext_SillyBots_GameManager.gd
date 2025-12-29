@@ -2,8 +2,15 @@ extends "res://Globals/GameManager.gd"
 
 var spawn_available = true
 var funnykeypressbool
+
+var teslabotIndex
+
+func _ready():
+	super._ready()
+	teslabotIndex = get_node("/root/ModLoader/TheTimesweeper-SillyBots/SillyBusiness").teslabot.index
+
 func spawn_enemy(type: Enemy.EnemyType):
-	type = SillyBotsMain.teslabot.index if spawn_available else type
+	type = teslabotIndex if spawn_available else type
 	spawn_available = false
 	return super.spawn_enemy(type)
 

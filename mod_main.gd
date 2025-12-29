@@ -1,5 +1,4 @@
 extends Node
-class_name SillyBotsMain
 
 # ! Comments prefixed with "!" mean they are extra info. Comments without them
 # ! should be kept because they give your mod structure and make it easier to
@@ -22,39 +21,46 @@ var translations_dir_path := ""
 const tesla_bot_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/TeslaBot.tscn"
 const default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
 
-static var teslabot : CustomEnemyDef
+var teslabot 
+
+var contentContainer : Node
 
 # ! your _ready func.
 func _init() -> void:
-	ModLoaderLog.error("Init this beeitch", "SillyBots")
 	mod_dir_path = ModLoaderMod.get_unpacked_dir().path_join(MOD_DIR)
 
-	ModLoaderLog.error("Init this beeitch", LOG_NAME)
-	# script_hooks_path = mod_dir_path.path_join("extensions/Scripts")
+	ModLoaderLog.error("Init this beeitch", "SillyBots")
+
+	add_child_class()
+
 	# Add extensions
 	install_script_extensions()
 	# install_script_hook_files()
 
-	ContentContainer.instance.initialize.connect(add_enemy)
-	
-	# Add translations
-	# add_translations()
+# thanks brotato https://wiki.godotmodding.com/guides/modding/global_classes_and_child_nodes/
+func add_child_class():
+	contentContainer = load("res://mods-unpacked/TheTimesweeper-SillyBots/silly_business.gd").new()
+	contentContainer.name = "SillyBusiness"
+	add_child(contentContainer)
 
 func add_enemy():
-	teslabot = CustomEnemyDef.new()
+	teslabot = contentContainer.create_new_enemydef()
 	teslabot.name = "TeslaTrooper"
 	teslabot.scene_path = tesla_bot_path
 	teslabot.default_skin_path = default_skin_path
 
-	ContentContainer.add_enemydef(teslabot)
+	contentContainer.add_enemydef(teslabot)
+
+	var sillyBusiness = get_node("/root/ModLoader/TheTimesweeper-SillyBots/SillyBusiness")
+	sillyBusiness.teslabot = teslabot
 
 func install_script_extensions() -> void:
 	# ! any script extensions should go in this directory, and should follow the same directory structure as vanilla
 	extensions_dir_path = mod_dir_path.path_join("extensions")
 
 	# ? Brief description/reason behind this edit of vanilla code...
-	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_GameManager.gd"))
-	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SummonButton.gd"))
+	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_GameManager.gd"))
+	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_SummonButton.gd"))
 	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_Enemy.gd"))
 	#ModLoaderMod.install_script_extension(ext_dir + "entities/units/player/player.gd") # ! Note that this file does not exist in this example mod
 
@@ -68,4 +74,7 @@ func install_script_extensions() -> void:
 	#ModLoaderMod.install_script_hooks("res://main.gd", extensions_dir_path.path_join("main.gd"))
 
 
-
+func _ready():
+	
+	contentContainer = get_node("/root/ModLoader/TheTimesweeper-CustomEnemyAPI/ContentContainer")
+	contentContainer.initialize.connect(add_enemy)

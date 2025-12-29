@@ -18,7 +18,7 @@ const IDEAL_FIRING_RANGE = 150
 var reposition_point = Vector2.ZERO
 
 func initialize(body_, starting_conditions = null):
-	if not body_ is Enemy or body_.enemy_type != SillyBotsMain.teslabot.index:
+	if not body_ is Enemy or body_.enemy_type != GameManager.teslabotIndex:
 		print("ERROR: Tesla AI is not compatible with node: ", body_)
 		return
 		

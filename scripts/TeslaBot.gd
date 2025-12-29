@@ -47,12 +47,45 @@ var secondary_base_cooldown = 0.5
 
 var allowed_conductors = 3
 var thrown_conductors = []
+class SkillState:
 
+	var outer
+	var age = 0
+	func _onEnter():
+		pass
+
+	func _onUpdate(delta):
+		age += delta
+
+	func _onExit():
+		pass
+
+class SkillStateMachine: 
+
+	var currentState = SkillState.new()
+	var nextState
+
+	func setState(state):
+		nextState = state
+
+	func update(delta):
+
+		if(nextState != currentState):
+			if currentState:
+				currentState._onExit()
+			if nextState:
+				nextState.outer = self
+				nextState._onEnter()
+			currentState = nextState
+			
+		if currentState:
+			currentState._onUpdate(delta)
+		pass
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
 	primaryStateMachine = SkillStateMachine.new()
-	enemy_type = SillyBotsMain.teslabot.index
+	enemy_type = GameManager.teslabotIndex
 	if not is_previous_floor_host: max_health = 75
 	accel = 10
 	max_speed = 160
