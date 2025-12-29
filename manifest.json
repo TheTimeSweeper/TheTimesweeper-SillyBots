@@ -20,7 +20,7 @@
 			"incompatibilities": [],
 			"load_before": [],
 			"optional_dependencies": [
-				"test1-CustomEnemyAPI"
+				"TheTimesweeper-CustomEnemyAPI"
 			],
 			"tags": []
 		}
@@ -28,5 +28,5 @@
 	"name": "SillyBots",
 	"namespace": "TheTimesweeper",
 	"version_number": "0.1.0",
-	"website_url": "https://github.com/TheTimeSweeper/SillyBots"
+	"website_url": "https://github.com/TheTimeSweeper/TheTimesweeper-SillyBots"
 }

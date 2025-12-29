@@ -26,7 +26,6 @@ static var teslabot : CustomEnemyDef
 
 # ! your _ready func.
 func _init() -> void:
-	return
 	ModLoaderLog.error("Init this beeitch", "SillyBots")
 	mod_dir_path = ModLoaderMod.get_unpacked_dir().path_join(MOD_DIR)
 

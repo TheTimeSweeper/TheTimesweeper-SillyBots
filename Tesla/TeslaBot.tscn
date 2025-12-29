@@ -1184,7 +1184,6 @@ z_index = 80
 collision_mask = 264
 script = ExtResource("1_trbqk")
 ignore_skin = true
-skip_spawn_animation = true
 
 [node name="AI" type="Node2D" parent="."]
 script = ExtResource("2_5ejwp")
