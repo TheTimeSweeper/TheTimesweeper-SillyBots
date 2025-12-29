@@ -14,9 +14,6 @@ var init_height = 10
 var init_falling_vel = DEFAULT_INIT_FALLING_VEL
 var init_lifetime = 20
 
-# bit unintuitively used when spawning
-static var distance = 69
-
 var deployable_owner
 
 # assigned when spawning

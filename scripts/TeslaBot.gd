@@ -17,7 +17,7 @@ var max_range = 150
 var ai_can_shoot = false
 var ai_move_timer = 0
 var ai_shoot_timer = 0
-var ai_target_point = Vector2.ZERO
+var ai_target_point = Vector2.ZERO 
 
 var self_parry_damage_due = false
 
@@ -41,46 +41,14 @@ var primaryStateMachine
 
 var lightning_damage = 6
 var lightning_damage_final = 12
-static var lightning_travelTime = 0.1
+var lightning_travelTime = 0.1
 
 var secondary_base_cooldown = 0.5
 
+var condcutor_throw_distance = 69
+
 var allowed_conductors = 3
 var thrown_conductors = []
-class SkillState:
-
-	var outer
-	var age = 0
-	func _onEnter():
-		pass
-
-	func _onUpdate(delta):
-		age += delta
-
-	func _onExit():
-		pass
-
-class SkillStateMachine: 
-
-	var currentState = SkillState.new()
-	var nextState
-
-	func setState(state):
-		nextState = state
-
-	func update(delta):
-
-		if(nextState != currentState):
-			if currentState:
-				currentState._onExit()
-			if nextState:
-				nextState.outer = self
-				nextState._onEnter()
-			currentState = nextState
-			
-		if currentState:
-			currentState._onUpdate(delta)
-		pass
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
@@ -148,7 +116,7 @@ func throw_conductor():
 	thrown_conductors.push_back(conductor)
 	conductor.global_position = facing_offset_position
 	conductor.causality.set_source(self)
-	conductor.destination = global_position + (aim_direction.normalized() * TeslaConductor.distance)
+	conductor.destination = global_position + (aim_direction.normalized() * condcutor_throw_distance)
 
 	if check_conductor_count() > allowed_conductors:
 		kill_conductor()
@@ -233,6 +201,17 @@ func update_aim_indicators():
 	# aim_indicator.set_spread(deg_to_rad(bullet_spread*loaded_shells))
 	aim_indicator.set_direction(aim_direction)
 
+func fire_lightning(lightningParams):
+	
+	var lightningBolt = TeslaBot.lightning_scene.instantiate()
+
+	Util.set_object_elevation(lightningBolt, Util.elevation_from_z_index(lightningParams.source.z_index))
+	GameManager.call_deferred('add_entity_to_scene_tree',  lightningBolt, lightningParams.source.get_parent() , Vector2.ZERO)
+
+	lightningBolt._fire(lightningParams)
+
+func create_lightningboltparams():
+	return LightningBoltParams.new()
 
 class FireLightning extends SkillState:
 	var selfEnemy = null
@@ -331,11 +310,128 @@ class FireLightning extends SkillState:
 		var params = LightningBoltParams.new()
 		params.source = selfEnemy
 		params.damage = selfEnemy.lightning_damage_final if shotsFired == shots else selfEnemy.lightning_damage 
-		params.travelTime = TeslaBot.lightning_travelTime
+		params.travelTime = selfEnemy.lightning_travelTime
 		params.startPosition = startpos
 		params.destination = resultPosition
 		params.target = entity
 		params.remainingBounces = 1
 		params.finalBolt = (shotsFired == shots)
 
-		SillyViolence.fire_lightning(params)
+		selfEnemy.fire_lightning(params)
+
+#lightningbolt params was in its own class_name file
+class LightningBoltParams:
+	var source
+	var damage
+	var travelTime
+	var startPosition
+	var destination
+	var target
+	var remainingBounces
+	var alreadyBounced = []
+	var finalBolt = false
+
+	var color = Color(1, 1, 1, 1)
+
+	func duplicate():
+		var dup = LightningBoltParams.new()
+		dup.source = source
+		dup.damage = damage
+		dup.travelTime = travelTime
+		dup.startPosition = startPosition
+		dup.destination = destination
+		dup.target = target
+		dup.remainingBounces = remainingBounces
+		dup.alreadyBounced = alreadyBounced
+		dup.finalBolt = finalBolt
+		dup.color = color
+		return dup
+
+	func chain(startPosition_, destination_, target_):
+		startPosition = startPosition_
+		destination = destination_
+		target = target_
+		return self
+
+	func set_destination(new_destination):
+		destination = new_destination
+		return self
+	func set_startPosition(new_startPosition):
+		startPosition = new_startPosition
+		return self
+	func set_target(new_target):
+		target = new_target
+		return self
+
+	func set_color(new_color):
+		color = new_color
+		return self
+#skillstate stuff cause I can't have them in different classes
+# future me can deal with that
+
+class TimedSkillState:
+	extends SkillState
+
+	var duration = 1
+	var castTimeFraction = 0.5
+	var hasCasted = false
+
+	func _initTimes(duration_, castTimeFraction_ = 0.5):
+		duration = duration_
+		castTimeFraction = castTimeFraction_
+
+	func _onUpdate(delta):
+		super._onUpdate(delta)
+		
+		if(age >= duration * castTimeFraction):
+			if not hasCasted:
+				hasCasted = true
+				_onCastEnter()
+			_onCastUpdate(delta)
+
+		if (age >= duration):
+			_onCastExit()
+
+	func _onCastEnter():
+		pass
+
+	func _onCastUpdate(delta):
+		pass
+
+	func _onCastExit():
+		outer.setNextState(null)
+		
+class SkillState:
+
+	var outer
+	var age = 0
+	func _onEnter():
+		pass
+
+	func _onUpdate(delta):
+		age += delta
+
+	func _onExit():
+		pass
+
+class SkillStateMachine: 
+
+	var currentState = SkillState.new()
+	var nextState
+
+	func setState(state):
+		nextState = state
+
+	func update(delta):
+
+		if(nextState != currentState):
+			if currentState:
+				currentState._onExit()
+			if nextState:
+				nextState.outer = self
+				nextState._onEnter()
+			currentState = nextState
+			
+		if currentState:
+			currentState._onUpdate(delta)
+		pass

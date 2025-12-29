@@ -5,7 +5,7 @@ extends Node2D
 
 @onready var shootAudio2 = get_node("ShootAudio2")
 
-var lightningBoltParams : LightningBoltParams
+var lightningBoltParams
 
 var target:
 	get: return lightningBoltParams.target
@@ -25,6 +25,7 @@ var destination
 var pointIntervalDistance = 20
 var pointVariance = 5
 var orthogonalDistance = 12
+var lightning_travelTime = 0.1
 
 # used and modified in code
 var timer = 0
@@ -144,7 +145,7 @@ func fireNewBolt(all = false, oll = false):
 			enemy_candidates_free.append(enemy)
 
 	# get all conductors
-	var conductor_candidates = TeslaConductor.instances_list.duplicate()
+	var conductor_candidates = attack.causality.source.thrown_conductors.duplicate()
 	conductor_candidates.shuffle()
 	var conductor_candidates_free = []
 	var conductor_candidates_used = []
@@ -165,13 +166,13 @@ func fireNewBolt(all = false, oll = false):
 		if candidate == attack.causality.source: continue
 		if candidate == target: continue
 		# fire from all nearby conductors to the current target
-		if candidate is TeslaConductor && oll:
+		if candidate in conductor_candidates && oll:
 			
 			# todo pull this out of the for loop but also do the `all` thing a little better
-			var params = LightningBoltParams.new()
+			var params = attack.causality.source.create_lightningboltparams()
 			params.source = attack.causality.source
 			params.damage = attack.damage
-			params.travelTime = TeslaBot.lightning_travelTime
+			params.travelTime = lightning_travelTime
 			params.startPosition = candidate.global_position
 			params.destination = destination
 			params.target = target
@@ -179,14 +180,14 @@ func fireNewBolt(all = false, oll = false):
 			params.alreadyBounced = []
 			params.color = Color(0, 1, 1, 1)
 
-			SillyViolence.fire_lightning(params)
+			attack.causality.source.fire_lightning(params)
 		else: if all:
 			
 			# todo pull this out of the for loop but also do the `all` thing a little better
-			var params = LightningBoltParams.new()
+			var params = attack.causality.source.create_lightningboltparams()
 			params.source = attack.causality.source
 			params.damage = attack.damage
-			params.travelTime = TeslaBot.lightning_travelTime
+			params.travelTime = lightning_travelTime
 			params.startPosition = destination
 			params.destination = candidate.global_position
 			params.target = candidate
@@ -194,8 +195,8 @@ func fireNewBolt(all = false, oll = false):
 			params.alreadyBounced = alreadyBounced
 			params.color = Color(0, 1, 1, 1)
 
-			SillyViolence.fire_lightning(params)
-		else: if not candidate is TeslaConductor:
+			attack.causality.source.fire_lightning(params)
+		else: if not candidate in conductor_candidates:
 			finalCandidate = candidate
 			break
 
@@ -203,5 +204,4 @@ func fireNewBolt(all = false, oll = false):
 		
 		var params = lightningBoltParams.duplicate().chain(destination, finalCandidate.global_position, finalCandidate)
 
-		SillyViolence.fire_lightning(params)
-
+		attack.causality.source.fire_lightning(params)
