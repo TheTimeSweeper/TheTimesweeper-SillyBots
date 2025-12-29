@@ -44,12 +44,14 @@ func add_child_class():
 	add_child(contentContainer)
 
 func add_enemy():
-	teslabot = contentContainer.create_new_enemydef()
+	teslabot = contentContainer.create_new_enemyDef()
 	teslabot.name = "TeslaTrooper"
 	teslabot.scene_path = tesla_bot_path
 	teslabot.default_skin_path = default_skin_path
+	teslabot.spawn_level = 1
+	teslabot.fitness_score = 50
 
-	contentContainer.add_enemydef(teslabot)
+	contentContainer.add_enemyDef(teslabot)
 
 	var sillyBusiness = get_node("/root/ModLoader/TheTimesweeper-SillyBots/SillyBusiness")
 	sillyBusiness.teslabot = teslabot
@@ -60,7 +62,7 @@ func install_script_extensions() -> void:
 
 	# ? Brief description/reason behind this edit of vanilla code...
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_GameManager.gd"))
-	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_SummonButton.gd"))
+	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_SummonButton.gd"))
 	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_Enemy.gd"))
 	#ModLoaderMod.install_script_extension(ext_dir + "entities/units/player/player.gd") # ! Note that this file does not exist in this example mod
 

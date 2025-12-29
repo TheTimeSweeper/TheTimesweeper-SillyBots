@@ -56,8 +56,8 @@ func _ready():
 	enemy_type = GameManager.teslabotIndex
 	if not is_previous_floor_host: max_health = 75
 	accel = 10
-	max_speed = 160
-	bullet_spawn_offset = 10
+	max_speed = 120
+	bullet_spawn_offset = 13
 	vertical_bullet_spawn_offset = -3
 	flip_offset = 0
 	max_special_cooldown = 1.5
@@ -219,7 +219,7 @@ class FireLightning extends SkillState:
 	var interval = 0.12
 	var shots = 5
 	var baseDuration = 0.9
-	var maxRange = 300
+	var maxRange = 230
 
 	var timer = 0
 	var shotsFired = 0

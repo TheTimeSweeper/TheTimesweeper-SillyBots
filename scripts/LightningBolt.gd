@@ -151,6 +151,8 @@ func fireNewBolt(all = false, oll = false):
 	var conductor_candidates_used = []
 	# filter if they're close enough, and split them into lists as above
 	for conductor in conductor_candidates:
+		if !is_instance_valid(conductor):
+			continue
 		if conductor.global_position.distance_to(destination) > 100:
 			continue
 		if conductor in alreadyBounced: 
