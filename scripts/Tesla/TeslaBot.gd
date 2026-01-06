@@ -1,18 +1,18 @@
 class_name TeslaBot
 extends Enemy
 
-@onready var muzzle_flash = $MuzzleFlash
 @onready var spawn_audio = $SpawnAudio
 @onready var aim_indicator = $AimIndicator
 @onready var shootAudio1 = $ShootAudio
 @onready var shootAudio2 = $ShootAudio2
 @onready var lightningScanCollision : CollisionShape2D = $LightningScanCollision
 @onready var chargeSprite : AnimatedSprite2D = $ChargeSprite
+@onready var primaryStateMachine = $PrimaryStateMachine
 
 var default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
-var red_skin_path = "res://Art/Characters/ShotgunnerRAM/Red 63x113.png"
-var blue_skin_path = "res://Art/Characters/ShotgunnerRAM/blue 63x113.png"
-var yellow_skin_path = "res://Art/Characters/ShotgunnerRAM/yellow 63x113.png"
+# var red_skin_path = "res://Art/Characters/ShotgunnerRAM/Red 63x113.png"
+# var blue_skin_path = "res://Art/Characters/ShotgunnerRAM/blue 63x113.png"
+# var yellow_skin_path = "res://Art/Characters/ShotgunnerRAM/yellow 63x113.png"
 
 var max_range = 150
 var ai_can_shoot = false
@@ -23,8 +23,8 @@ var ai_target_point = Vector2.ZERO
 var reload_audio_preempt_interval = 0.25
 var reload_audio_has_played = false
 
-const lightning_scene = preload("res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/LightningBolt.tscn")
-const conductor_scene = preload("res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/TeslaConductor.tscn")
+const lightning_scene = preload("res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/LightningBolt.tscn")
+const conductor_scene = preload("res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/TeslaConductor.tscn")
 
 var shoot_offset = 13
 var facing_offset:
@@ -32,9 +32,7 @@ var facing_offset:
 var facing_offset_position:
 	get: return global_position + Vector2(facing_offset, 0)
 
-var charge_sprite_offset = 9.275
-
-var primaryStateMachine
+var charge_sprite_offset = 11.275
 
 var lightning_damage = 4
 var lightning_damage_final_mult = 4
@@ -64,19 +62,17 @@ var holding_primary = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
-	primaryStateMachine = SkillStateMachine.new()
 	enemy_type = GameManager.teslabotIndex
 	if not is_previous_floor_host: max_health = 75
 	accel = 10
 	max_speed = 120
-	bullet_spawn_offset = 13
-	vertical_bullet_spawn_offset = -3
-	flip_offset = 0
+	#bullet_spawn_offset = 13
+	#vertical_bullet_spawn_offset = -3
+	flip_offset = -4
 	max_special_cooldown = 1.5
-	attack_cooldown_audio_preempt = 0.2
+	#attack_cooldown_audio_preempt = 0.2
 	aim_indicator.visible = false
 	chargeSprite.visible = false
-	charge_sprite_offset = chargeSprite.position.x
 	default_skin = default_skin_path
 	on_swapped_into.connect(update_conductors)
 	super._ready()
@@ -190,14 +186,14 @@ func kill_conductor():
 		last.queue_free()
 		return
 
-func handle_legacy_elite_skins():
-	if 'induction_barrel' in upgrades:
-		sprite.texture = load(red_skin_path)
-	elif "soldering_fingers" in upgrades:
-		sprite.texture = load(blue_skin_path)
-		#TODO Maybe pick a better upgrade?
-	elif "stacked_shells" in upgrades:
-		sprite.texture = load(yellow_skin_path)
+# func handle_legacy_elite_skins():
+# 	if 'induction_barrel' in upgrades:
+# 		sprite.texture = load(red_skin_path)
+# 	elif "soldering_fingers" in upgrades:
+# 		sprite.texture = load(blue_skin_path)
+# 		#TODO Maybe pick a better upgrade?
+# 	elif "stacked_shells" in upgrades:
+# 		sprite.texture = load(yellow_skin_path)
 
 # func handle_skin():
 # 	enemy_fx.get_node("CASHParticles").emitting = false
@@ -227,14 +223,14 @@ func finish_spawning():
 	super()
 	update_aim_indicator_visibility()
 
-func show_muzzle_flash():
-	muzzle_flash.rotation = aim_direction.angle();
-	muzzle_flash.show_behind_parent = muzzle_flash.rotation < deg_to_rad(-30) and muzzle_flash.rotation > deg_to_rad(-150)
-	muzzle_flash.frame = 0
-	muzzle_flash.play("Flash")
-	gun_particles.position.x = -13 if facing_left else 13
-	gun_particles.rotation = muzzle_flash.rotation
-	gun_particles.emitting = true
+# func show_muzzle_flash():
+# 	muzzle_flash.rotation = aim_direction.angle();
+# 	muzzle_flash.show_behind_parent = muzzle_flash.rotation < deg_to_rad(-30) and muzzle_flash.rotation > deg_to_rad(-150)
+# 	muzzle_flash.frame = 0
+# 	muzzle_flash.play("Flash")
+# 	gun_particles.position.x = -13 if facing_left else 13
+# 	gun_particles.rotation = muzzle_flash.rotation
+# 	gun_particles.emitting = true
 	
 func die(attack):
 	super(attack)
@@ -267,7 +263,7 @@ func create_lightningboltparams():
 	return LightningBoltParams.new()
 
 
-class ChargeLightning extends SkillState:
+class ChargeLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillState.gd":
 	var selfEnemy
 	var charge
 
@@ -298,7 +294,7 @@ class ChargeLightning extends SkillState:
 		selfEnemy.cancel_effect(EffectType.SPEED_OVERRIDE, selfEnemy)
 		selfEnemy.chargeSprite.visible = false
 
-class FireLightning extends SkillState:
+class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillState.gd":
 	var selfEnemy : TeslaBot = null
 
 	var interval = 0.12
@@ -482,72 +478,3 @@ class LightningBoltParams:
 	func set_color(new_color):
 		color = new_color
 		return self
-#skillstate stuff cause I can't have them in different classes
-# future me can deal with that
-
-class TimedSkillState:
-	extends SkillState
-
-	var duration = 1
-	var castTimeFraction = 0.5
-	var hasCasted = false
-
-	func _initTimes(duration_, castTimeFraction_ = 0.5):
-		duration = duration_
-		castTimeFraction = castTimeFraction_
-
-	func _onUpdate(delta):
-		super._onUpdate(delta)
-		
-		if(age >= duration * castTimeFraction):
-			if not hasCasted:
-				hasCasted = true
-				_onCastEnter()
-			_onCastUpdate(delta)
-
-		if (age >= duration):
-			_onCastExit()
-
-	func _onCastEnter():
-		pass
-
-	func _onCastUpdate(delta):
-		pass
-
-	func _onCastExit():
-		outer.setNextState(null)
-		
-class SkillState:
-
-	var outer
-	var age = 0
-	func _onEnter():
-		pass
-
-	func _onUpdate(delta):
-		age += delta
-
-	func _onExit():
-		pass
-
-class SkillStateMachine: 
-
-	var currentState = SkillState.new()
-	var nextState
-
-	func setState(state):
-		nextState = state
-
-	func update(delta):
-
-		if(nextState != currentState):
-			if currentState:
-				currentState._onExit()
-			if nextState:
-				nextState.outer = self
-				nextState._onEnter()
-			currentState = nextState
-			
-		if currentState:
-			currentState._onUpdate(delta)
-		pass

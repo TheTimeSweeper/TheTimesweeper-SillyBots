@@ -1,97 +1,19 @@
-[gd_scene load_steps=121 format=3 uid="uid://dtbas3s8ymopi"]
+[gd_scene load_steps=105 format=3 uid="uid://c3xnxd8yirdju"]
 
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBot.gd" id="1_trbqk"]
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBotAI.gd" id="2_5ejwp"]
-[ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_1.png" id="3_jnx4g"]
-[ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/itesatta_01.wav" id="4_tcden"]
-[ext_resource type="PackedScene" uid="uid://dhyhd3wcgn6ql" path="res://Scenes/UI/AimIndicatorCircle.tscn" id="9_3qq83"]
-[ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_1.wav" id="10_5attc"]
-[ext_resource type="AudioStream" uid="uid://bqsotfhvwifnq" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_2.wav" id="11_1ogdr"]
-[ext_resource type="AudioStream" uid="uid://tj0puoybw60e" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_SPAWN.wav" id="11_gh88l"]
-[ext_resource type="AudioStream" uid="uid://d3xarhrbppnx8" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_Death.wav" id="12_hc7kf"]
-[ext_resource type="AudioStream" uid="uid://dpxi1vx15rgn7" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_3.wav" id="12_whiix"]
-[ext_resource type="PackedScene" uid="uid://b1ukkyv4lt0np" path="res://Scenes/Hosts/Effects/EnemyFX.tscn" id="13_svnk1"]
-[ext_resource type="Texture2D" uid="uid://kek2465qusef" path="res://Art/Environment/Sci-fi Animations/clear moon sprite.png" id="14_a61hh"]
-[ext_resource type="Texture2D" uid="uid://nmye71xp116l" path="res://Art/Shields/swap shield PEN.png" id="15_x5sck"]
-[ext_resource type="Texture2D" uid="uid://cv734mstudjkd" path="res://Art/Lights/LowRes/ShotgunnerEye.png" id="16_876av"]
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillStateMachine.gd" id="16_o8ygc"]
-[ext_resource type="Texture2D" uid="uid://bau4cmcbtyc1a" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_charge.png" id="17_7hj23"]
-
-[sub_resource type="Shader" id="Shader_m2138"]
-code = "shader_type canvas_item;
-
-uniform sampler2D SCREEN_TEXTURE: hint_screen_texture, filter_linear_mipmap;
-uniform float screen_width = 1024;
-uniform float screen_height = 600;
-
-// Curvature
-uniform float BarrelPower =1.1;
-// Color bleeding
-uniform float color_bleeding = 1.2;
-uniform float bleeding_range_x = 3;
-uniform float bleeding_range_y = 3;
-// Scanline
-uniform float lines_distance = 4.0;
-uniform float scan_size = 2.0;
-uniform float scanline_alpha = 0.9;
-uniform float lines_velocity = 30.0;
-
-vec2 distort(vec2 p) 
-{
-	float angle = p.y / p.x;
-	float theta = atan(p.y,p.x);
-	float radius = pow(length(p), BarrelPower);
-	
-	p.x = radius * cos(theta);
-	p.y = radius * sin(theta);
-	
-	return 0.5 * (p + vec2(1.0,1.0));
-}
-
-void get_color_scanline(vec2 uv,inout vec4 c,float time){
-	float line_row = floor((uv.y * screen_height/scan_size) + mod(time*lines_velocity, lines_distance));
-	float n = 1.0 - ceil((mod(line_row,lines_distance)/lines_distance));
-	c = c - n*c*(1.0 - scanline_alpha);
-}
-
-void fragment()
-{
-	vec2 xy = SCREEN_UV * 2.0;
-	xy.x -= 1.0;
-	xy.y -= 1.0;
-	
-	float d = length(xy);
-	if(d < 1.5){
-		xy = distort(xy);
-	}
-	else{
-		xy = SCREEN_UV;
-	}
-	
-	float pixel_size_x = 1.0/screen_width*bleeding_range_x;
-	float pixel_size_y = 1.0/screen_height*bleeding_range_y;
-	vec4 c = COLOR;
-	get_color_scanline(xy,c,TIME);
-	COLOR = c;
-
-}"
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_0obu7"]
-shader = SubResource("Shader_m2138")
-shader_parameter/screen_width = 512.0
-shader_parameter/screen_height = 300.0
-shader_parameter/BarrelPower = 1.1
-shader_parameter/color_bleeding = 1.2
-shader_parameter/bleeding_range_x = 3.0
-shader_parameter/bleeding_range_y = 3.0
-shader_parameter/lines_distance = 4.0
-shader_parameter/scan_size = 3.0
-shader_parameter/scanline_alpha = -3.0
-shader_parameter/lines_velocity = 10.0
-
-[sub_resource type="Gradient" id="Gradient_ii3qe"]
-offsets = PackedFloat32Array(0, 0.509934, 1)
-colors = PackedColorArray(1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0)
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Base/BaseBot.gd" id="1_rmq5w"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBotAI.gd" id="2_k5om3"]
+[ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_1.png" id="3_j33a0"]
+[ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/itesatta_01.wav" id="4_y556w"]
+[ext_resource type="PackedScene" uid="uid://dhyhd3wcgn6ql" path="res://Scenes/UI/AimIndicatorCircle.tscn" id="7_h1ydt"]
+[ext_resource type="AudioStream" uid="uid://tj0puoybw60e" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_SPAWN.wav" id="8_wykf6"]
+[ext_resource type="AudioStream" uid="uid://d3xarhrbppnx8" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_Death.wav" id="9_kx8lq"]
+[ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_1.wav" id="10_h13dm"]
+[ext_resource type="AudioStream" uid="uid://bqsotfhvwifnq" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_2.wav" id="11_6nvla"]
+[ext_resource type="AudioStream" uid="uid://dpxi1vx15rgn7" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_3.wav" id="12_i32kn"]
+[ext_resource type="PackedScene" uid="uid://b1ukkyv4lt0np" path="res://Scenes/Hosts/Effects/EnemyFX.tscn" id="13_6d8pm"]
+[ext_resource type="Texture2D" uid="uid://kek2465qusef" path="res://Art/Environment/Sci-fi Animations/clear moon sprite.png" id="14_j41cm"]
+[ext_resource type="Texture2D" uid="uid://nmye71xp116l" path="res://Art/Shields/swap shield PEN.png" id="15_4ijqi"]
+[ext_resource type="Texture2D" uid="uid://cv734mstudjkd" path="res://Art/Lights/LowRes/ShotgunnerEye.png" id="16_hscev"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ni7vv"]
 radius = 2.5
@@ -137,18 +59,6 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [12]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("ChargeSprite:offset")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [Vector2(0, 0)]
 }
 
 [sub_resource type="Animation" id="Animation_0jufg"]
@@ -348,7 +258,7 @@ tracks/3/keys = {
 "clips": [{
 "end_offset": 0.0,
 "start_offset": 0.0,
-"stream": ExtResource("4_tcden")
+"stream": ExtResource("4_y556w")
 }],
 "times": PackedFloat32Array(0)
 }
@@ -523,307 +433,303 @@ height = 25.0
 radius = 16.0
 height = 38.0
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_dhsrb"]
-radius = 9.99972
-height = 94.0124
-
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_jn4w2"]
 playback_mode = 1
 random_pitch = 1.4
 streams_count = 3
-stream_0/stream = ExtResource("10_5attc")
+stream_0/stream = ExtResource("10_h13dm")
 stream_0/weight = 1.0
-stream_1/stream = ExtResource("11_1ogdr")
+stream_1/stream = ExtResource("11_6nvla")
 stream_1/weight = 1.0
-stream_2/stream = ExtResource("12_whiix")
+stream_2/stream = ExtResource("12_i32kn")
 stream_2/weight = 1.0
 
 [sub_resource type="AtlasTexture" id="2"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="3"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="4"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="5"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="6"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="7"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="8"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="9"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="10"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="11"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="12"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="13"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="14"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="15"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="16"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="17"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 128, 128, 128)
 
 [sub_resource type="AtlasTexture" id="18"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="19"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="20"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="21"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="22"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="23"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="24"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="25"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 256, 128, 128)
 
 [sub_resource type="AtlasTexture" id="26"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="27"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="28"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="29"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="30"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="31"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="32"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="33"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 384, 128, 128)
 
 [sub_resource type="AtlasTexture" id="34"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="35"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="36"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="37"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="38"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="39"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="40"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="41"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 512, 128, 128)
 
 [sub_resource type="AtlasTexture" id="42"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="43"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="44"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="45"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="46"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="47"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="48"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="49"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 640, 128, 128)
 
 [sub_resource type="AtlasTexture" id="50"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="51"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="52"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="53"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="54"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(512, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="55"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(640, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="56"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(768, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="57"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(896, 768, 128, 128)
 
 [sub_resource type="AtlasTexture" id="58"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(0, 896, 128, 128)
 
 [sub_resource type="AtlasTexture" id="59"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(128, 896, 128, 128)
 
 [sub_resource type="AtlasTexture" id="60"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(256, 896, 128, 128)
 
 [sub_resource type="AtlasTexture" id="61"]
-atlas = ExtResource("14_a61hh")
+atlas = ExtResource("14_j41cm")
 region = Rect2(384, 896, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4eggb"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(0, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5xe6y"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(40, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o6b7k"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(80, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ixxfp"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(120, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i5uqo"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(160, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_btgxp"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(200, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_73ttw"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(240, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m3qkf"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(280, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_y66ub"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(320, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kqn8o"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(360, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gw1r4"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(400, 0, 40, 31)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o5jsr"]
-atlas = ExtResource("15_x5sck")
+atlas = ExtResource("15_4ijqi")
 region = Rect2(440, 0, 40, 31)
 
 [sub_resource type="SpriteFrames" id="62"]
@@ -1080,104 +986,21 @@ hue_variation_max = 0.25
 anim_speed_min = 0.48
 anim_speed_max = 0.73
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_gopq5"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(0, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_aua3a"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(18, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_qkew1"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(36, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_b6wf8"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(54, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_geo3o"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(72, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lyool"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(90, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_fgit5"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(108, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_sstmx"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(126, 0, 18, 18)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xkxk6"]
-atlas = ExtResource("17_7hj23")
-region = Rect2(144, 0, 18, 18)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_fmjbt"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_gopq5")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_aua3a")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_qkew1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_b6wf8")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_geo3o")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_lyool")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_fgit5")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_sstmx")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_xkxk6")
-}],
-"loop": false,
-"name": &"default",
-"speed": 3.0
-}]
-
-[node name="TeslaBot" type="CharacterBody2D" groups=["enemy", "enemylike", "host"]]
+[node name="BaseBot" type="CharacterBody2D" groups=["enemy", "enemylike", "host"]]
 z_index = 80
 collision_mask = 264
-script = ExtResource("1_trbqk")
+script = ExtResource("1_rmq5w")
 ignore_skin = true
 
 [node name="AI" type="Node2D" parent="."]
-script = ExtResource("2_5ejwp")
-
-[node name="Sights" type="Line2D" parent="."]
-visible = false
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_0obu7")
-position = Vector2(0, 3)
-points = PackedVector2Array(65, -12.5, 0, 0, 67, 12.5)
-width = 1.5
-gradient = SubResource("Gradient_ii3qe")
-texture_mode = 1
-joint_mode = 1
+script = ExtResource("2_k5om3")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 modulate = Color(1.2, 1.2, 1.2, 1)
 light_mask = 5
 position = Vector2(2, 7)
 scale = Vector2(1.03, 1.03)
-texture = ExtResource("3_jnx4g")
+texture = ExtResource("3_j33a0")
 hframes = 12
 vframes = 6
 
@@ -1201,30 +1024,26 @@ position = Vector2(0, 3.70812)
 shape = SubResource("CapsuleShape2D_inrdi")
 
 [node name="AimAssistHitbox" type="Area2D" parent="."]
+position = Vector2(0, 1)
 collision_layer = 67108864
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AimAssistHitbox"]
 position = Vector2(0, 3)
 shape = SubResource("CapsuleShape2D_86oa0")
 
-[node name="AimIndicator" parent="." instance=ExtResource("9_3qq83")]
+[node name="AimIndicator" parent="." instance=ExtResource("7_h1ydt")]
+visible = false
 position = Vector2(0, 3)
 scale = Vector2(1, 0.65)
 
-[node name="LightningScanCollision" type="CollisionShape2D" parent="."]
-position = Vector2(0, 30)
-rotation = -0.0075053
-shape = SubResource("CapsuleShape2D_dhsrb")
-disabled = true
-
 [node name="SpawnAudio" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource("11_gh88l")
+stream = ExtResource("8_wykf6")
 volume_db = 0.5
 attenuation = 1.51572
 bus = &"Spawn"
 
 [node name="DeathAudio" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource("12_hc7kf")
+stream = ExtResource("9_kx8lq")
 volume_db = -5.0
 attenuation = 1.93187
 bus = &"Spawn"
@@ -1237,7 +1056,7 @@ stream = SubResource("AudioStreamRandomizer_jn4w2")
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.25
 
-[node name="EnemyFX" parent="." instance=ExtResource("13_svnk1")]
+[node name="EnemyFX" parent="." instance=ExtResource("13_6d8pm")]
 visible = false
 
 [node name="SwapShield" parent="EnemyFX" index="1"]
@@ -1273,14 +1092,7 @@ process_material = SubResource("ParticleProcessMaterial_y5cnd")
 [node name="EyeLight" type="PointLight2D" parent="."]
 visible = false
 position = Vector2(9, -2.5)
-texture = ExtResource("16_876av")
-
-[node name="ChargeSprite" type="AnimatedSprite2D" parent="."]
-position = Vector2(9.275, 1.485)
-sprite_frames = SubResource("SpriteFrames_fmjbt")
-
-[node name="PrimaryStateMachine" type="Node" parent="."]
-script = ExtResource("16_o8ygc")
+texture = ExtResource("16_hscev")
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_finished"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
