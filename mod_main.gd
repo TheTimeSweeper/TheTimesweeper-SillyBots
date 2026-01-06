@@ -18,13 +18,15 @@ var mod_dir_path := ""
 var extensions_dir_path := ""
 var translations_dir_path := ""
 
-const tesla_bot_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/TeslaBot.tscn"
-const default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
+const tesla_bot_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/TeslaBot.tscn"
+const default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTesla.png"
+
+const combo_bot_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Combo/ComboBot.tscn"
 
 var teslabot 
 
 var contentContainer : Node
-
+var sillyBusiness
 # ! your _ready func.
 func _init() -> void:
 	mod_dir_path = ModLoaderMod.get_unpacked_dir().path_join(MOD_DIR)
@@ -35,13 +37,13 @@ func _init() -> void:
 
 	# Add extensions
 	install_script_extensions()
-	# install_script_hook_files()
+	install_script_hook_files()
 
 # thanks brotato https://wiki.godotmodding.com/guides/modding/global_classes_and_child_nodes/
 func add_child_class():
-	contentContainer = load("res://mods-unpacked/TheTimesweeper-SillyBots/silly_business.gd").new()
-	contentContainer.name = "SillyBusiness"
-	add_child(contentContainer)
+	sillyBusiness = load("res://mods-unpacked/TheTimesweeper-SillyBots/silly_business.gd").new()
+	sillyBusiness.name = "SillyBusiness"
+	add_child(sillyBusiness)
 
 func add_enemy():
 	teslabot = contentContainer.create_new_enemyDef()
@@ -50,10 +52,11 @@ func add_enemy():
 	teslabot.default_skin_path = default_skin_path
 	teslabot.spawn_level = 1
 	teslabot.fitness_score = 50
+	teslabot.spawn_weight = 1
 
 	contentContainer.add_enemyDef(teslabot)
 
-	var sillyBusiness = get_node("/root/ModLoader/TheTimesweeper-SillyBots/SillyBusiness")
+	#var sillyBusiness = get_node("/root/ModLoader/TheTimesweeper-SillyBots/SillyBusiness")
 	sillyBusiness.teslabot = teslabot
 
 func install_script_extensions() -> void:
@@ -62,18 +65,14 @@ func install_script_extensions() -> void:
 
 	# ? Brief description/reason behind this edit of vanilla code...
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_GameManager.gd"))
-	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_SummonButton.gd"))
-	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_Enemy.gd"))
-	#ModLoaderMod.install_script_extension(ext_dir + "entities/units/player/player.gd") # ! Note that this file does not exist in this example mod
-
-	# ! Add extensions (longform version of the above)
-	#ModLoaderMod.install_script_extension("res://mods-unpacked/AuthorName-ModName/extensions/main.gd")
-	#ModLoaderMod.install_script_extension("res://mods-unpacked/AuthorName-ModName/extensions/entities/units/player/player.gd")
+	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("ext_SillyBots_SummonButton.gd"))
 
 
-#func install_script_hook_files() -> void:
-	#extensions_dir_path = mod_dir_path.path_join("extensions")
+
+func install_script_hook_files() -> void:
+	extensions_dir_path = mod_dir_path.path_join("extensions")
 	#ModLoaderMod.install_script_hooks("res://main.gd", extensions_dir_path.path_join("main.gd"))
+	ModLoaderMod.install_script_hooks("res://Scripts/Hosts/ShieldBot/ShieldBot.gd", extensions_dir_path.path_join("Scripts/Hosts/ShieldBot/ShieldBot.hooks.gd"))
 
 
 func _ready():

@@ -3,10 +3,11 @@ extends Enemy
 
 @onready var muzzle_flash = $MuzzleFlash
 @onready var spawn_audio = $SpawnAudio
-@onready var melee_collider_shape = $MeleeCollider/CollisionShape2D
 @onready var aim_indicator = $AimIndicator
 @onready var shootAudio1 = $ShootAudio
 @onready var shootAudio2 = $ShootAudio2
+@onready var lightningScanCollision : CollisionShape2D = $LightningScanCollision
+@onready var chargeSprite : AnimatedSprite2D = $ChargeSprite
 
 var default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
 var red_skin_path = "res://Art/Characters/ShotgunnerRAM/Red 63x113.png"
@@ -18,12 +19,6 @@ var ai_can_shoot = false
 var ai_move_timer = 0
 var ai_shoot_timer = 0
 var ai_target_point = Vector2.ZERO 
-
-var self_parry_damage_due = false
-
-var charging_melee := false
-var melee_charge_duration = 0.3
-var melee_charge_timer := 0.0
 
 var reload_audio_preempt_interval = 0.25
 var reload_audio_has_played = false
@@ -37,18 +32,35 @@ var facing_offset:
 var facing_offset_position:
 	get: return global_position + Vector2(facing_offset, 0)
 
+var charge_sprite_offset = 9.275
+
 var primaryStateMachine
 
-var lightning_damage = 6
-var lightning_damage_final = 12
+var lightning_damage = 4
+var lightning_damage_final_mult = 4
+
+var charged_lightning_min_damage = 2
+var charged_lightning_max_damage = 10
+var charged_lightning_charge_time = 3
+
+var lightning_max_range = 180
+var lightning_walk_speed = 90
 var lightning_travelTime = 0.1
 
-var secondary_base_cooldown = 0.5
+var lightning_scan_radius_player = 10
+var lightning_scan_radius_enemy = 2
+
+var lightning_scan_radius:
+	get: return lightning_scan_radius_player if is_player else lightning_scan_radius_enemy
+
+var secondary_base_cooldown = 2
 
 var condcutor_throw_distance = 69
 
 var allowed_conductors = 3
 var thrown_conductors = []
+
+var holding_primary = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
@@ -63,7 +75,10 @@ func _ready():
 	max_special_cooldown = 1.5
 	attack_cooldown_audio_preempt = 0.2
 	aim_indicator.visible = false
+	chargeSprite.visible = false
+	charge_sprite_offset = chargeSprite.position.x
 	default_skin = default_skin_path
+	on_swapped_into.connect(update_conductors)
 	super._ready()
 	
 func toggle_playerhood(state):
@@ -87,14 +102,40 @@ func misc_update(delta):
 
 	primaryStateMachine.update(delta)
 
+func update_conductors():
+	for conductor in thrown_conductors:
+		if conductor != null && is_instance_valid(conductor):
+			conductor.update_appearance(is_player)
+
+func _physics_process(delta):
+	super._physics_process(delta)
+	if dead:
+		for conductor in thrown_conductors:
+			if conductor != null && is_instance_valid(conductor):
+				conductor.queue_free()
+	if was_recently_player():
+		update_conductors()
+	else:
+		holding_primary = false
+
 func player_action():
-	if Input.is_action_pressed("attack1"):
-		shoot()
+
+	holding_primary = Input.is_action_pressed("attack1")
+	
+	if holding_primary:
+		charge_shoot()
 		
-	if Input.is_action_just_pressed("attack2") and special_cooldown < 0:
+	if Input.is_action_just_released("attack2") and special_cooldown < 0:
 		throw_conductor()
 		
 	update_aim_indicators()
+
+func charge_shoot():
+	if not primaryStateMachine.currentState:
+		var state = ChargeLightning.new()
+		state.selfEnemy = self
+		primaryStateMachine.setState(state)
+		# attack_cooldown = state.baseDuration
 
 func shoot():
 	if not primaryStateMachine.currentState:
@@ -111,7 +152,8 @@ func _on_animation_finished(anim_name):
 func throw_conductor():
 	special_cooldown = secondary_base_cooldown
 	attacking = true
-	play_animation("Special")
+	if !holding_primary:
+		play_animation("Special")
 	var conductor = conductor_scene.instantiate()
 	thrown_conductors.push_back(conductor)
 	conductor.global_position = facing_offset_position
@@ -131,6 +173,13 @@ func check_conductor_count():
 			continue
 		count += 1
 	return count
+
+func remove_conductor(toRemove):
+	var size = thrown_conductors.size()
+	for i in size:
+		if thrown_conductors[i] == toRemove:
+			thrown_conductors.remove_at(i)
+			return
 
 func kill_conductor():
 	var size = thrown_conductors.size()
@@ -196,6 +245,10 @@ func revive():
 	if SaveManager.settings.steeltoe_aiming_reticle and is_player:
 		aim_indicator.visible = true
 
+func update_look_direction(dir):
+	super.update_look_direction(dir)
+	chargeSprite.position.x = -charge_sprite_offset if facing_left else charge_sprite_offset
+
 	
 func update_aim_indicators():
 	# aim_indicator.set_spread(deg_to_rad(bullet_spread*loaded_shells))
@@ -213,27 +266,76 @@ func fire_lightning(lightningParams):
 func create_lightningboltparams():
 	return LightningBoltParams.new()
 
+
+class ChargeLightning extends SkillState:
+	var selfEnemy
+	var charge
+
+	func _onEnter():
+		selfEnemy.play_animation("Charge_Loop")
+		selfEnemy.apply_effect(EffectType.SPEED_OVERRIDE, selfEnemy, selfEnemy.lightning_walk_speed)
+		selfEnemy.attacking = true
+		selfEnemy.chargeSprite.visible = true
+		selfEnemy.chargeSprite.frame = 0
+		selfEnemy.chargeSprite.play("default")
+
+	func _onUpdate(delta):
+		super._onUpdate(delta)
+
+		if !selfEnemy.holding_primary:
+			release()
+		if !selfEnemy.was_recently_player() && age > selfEnemy.charged_lightning_charge_time:
+			release() 
+
+	func release():
+		var newState = FireLightning.new()
+		newState.selfEnemy = selfEnemy
+		var clampedAge = clamp(age, 0, selfEnemy.charged_lightning_charge_time)
+		newState.damage = lerp(selfEnemy.charged_lightning_min_damage, selfEnemy.charged_lightning_max_damage, clampedAge/selfEnemy.charged_lightning_charge_time)
+
+		outer.setState(newState)
+	func _onExit():
+		selfEnemy.cancel_effect(EffectType.SPEED_OVERRIDE, selfEnemy)
+		selfEnemy.chargeSprite.visible = false
+
 class FireLightning extends SkillState:
-	var selfEnemy = null
+	var selfEnemy : TeslaBot = null
 
 	var interval = 0.12
 	var shots = 5
 	var baseDuration = 0.9
-	var maxRange = 230
 
 	var timer = 0
 	var shotsFired = 0
 
-	var shapeCast2D : ShapeCast2D
+	var scanCollision : CollisionShape2D
 	var excluded
 	var mask
+	var space_state
+	var query
+	var damage
 
 	func _onEnter():
 		selfEnemy.attacking = true
 		selfEnemy.play_animation("Shoot")
-		shapeCast2D = selfEnemy.get_node("ShapeCast2D")
+		selfEnemy.apply_effect(EffectType.SPEED_OVERRIDE, selfEnemy, selfEnemy.lightning_walk_speed)
+
+		scanCollision = selfEnemy.lightningScanCollision
+		scanCollision.shape.height = selfEnemy.lightning_max_range
+		scanCollision.shape.radius = selfEnemy.lightning_scan_radius
+
 		excluded = selfEnemy.get_node('Hitbox')
 		mask = 4 | Util.bullet_collision_layers[selfEnemy.elevation]
+		
+		space_state = selfEnemy.get_world_2d().direct_space_state
+		query = PhysicsShapeQueryParameters2D.new()
+		query.collide_with_areas = true
+		query.collide_with_bodies = true
+		query.collision_mask = mask
+		query.exclude = [excluded]
+
+		if !damage:
+			damage = selfEnemy.lightning_damage
 
 		if ControllerIcons._last_input_type == ControllerIcons.InputType.CONTROLLER and selfEnemy.is_player:
 			Input.start_joy_vibration(0, 1, 0.2, baseDuration)
@@ -260,64 +362,76 @@ class FireLightning extends SkillState:
 
 	func _onExit():
 		selfEnemy.attacking = false
+		selfEnemy.cancel_effect(EffectType.SPEED_OVERRIDE, selfEnemy)
 	
 	func shoot_lightning():
 		
 		# selfEnemy.shootAudio2.play()
 
-		var toPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * maxRange)
+		var toPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * selfEnemy.lightning_max_range)
 
-		var resultCollider
 		var resultPosition = toPosition
-		
-		# raycast first, for most accurate aim
-		var space_state = selfEnemy.get_world_2d().direct_space_state
-		var query = PhysicsRayQueryParameters2D.new()
-		query.collide_with_areas = true
-		query.collide_with_bodies = true
-		query.collision_mask = mask
-		query.exclude = [excluded]
-		query.from = selfEnemy.global_position
-		query.to = toPosition
 
-		var result = space_state.intersect_ray(query)
-		if result: 
-			resultCollider = result.collider
-			resultPosition = result.position
-		# if raycast misses do a sphere cast for leniency
-		else:
-			shapeCast2D.collision_mask = mask
-			shapeCast2D.add_exception(excluded)
-			# guess now that it's a child node I don't need this
-			# shapeCast2D.global_position = selfEnemy.global_position
-			shapeCast2D.target_position = toPosition
-			shapeCast2D.force_shapecast_update()
+		scanCollision.global_position = selfEnemy.global_position + (toPosition - selfEnemy.global_position)/2
+		scanCollision.global_rotation = selfEnemy.aim_direction.angle() + PI*0.5
+		query.set_shape(scanCollision.shape)
+		query.transform = scanCollision.global_transform
+		var results = space_state.intersect_shape(query, 512)
 
-			if shapeCast2D.is_colliding():
-				resultCollider = shapeCast2D.get_collider(0)
-				resultPosition = shapeCast2D.get_collision_point(0)
-
-		var startpos = selfEnemy.facing_offset_position
+		var targetCastResult = find_best_result(results)
 
 		var entity = null
-		if resultCollider:
-			if resultCollider.is_in_group('hitbox'):
-				entity = resultCollider.get_parent()
-				resultPosition = entity.global_position
-			# if resultCollider is TeslaConductor:
-			# 	entity = resultCollider
-			# 	resultPosition = entity.global_position
+		if targetCastResult:
+			entity = targetCastResult
+			resultPosition = entity.global_position
+		
+		var startpos = selfEnemy.facing_offset_position
 		var params = LightningBoltParams.new()
 		params.source = selfEnemy
-		params.damage = selfEnemy.lightning_damage_final if shotsFired == shots else selfEnemy.lightning_damage 
+		params.damage = damage * (selfEnemy.lightning_damage_final_mult if shotsFired == shots else 1) 
 		params.travelTime = selfEnemy.lightning_travelTime
 		params.startPosition = startpos
 		params.destination = resultPosition
 		params.target = entity
 		params.remainingBounces = 1
 		params.finalBolt = (shotsFired == shots)
+		params.widthMult = damage / selfEnemy.lightning_damage
 
 		selfEnemy.fire_lightning(params)
+
+	func find_best_result(results):
+		var testAttack = Attack.new(selfEnemy)
+		testAttack.add_tag(Attack.Tag.ELECTRIC)
+
+		var closestAngle = 10
+		var closestPosition = 1000
+		# var closestPositionTarget
+
+		var bestTargetResult
+
+		var aimVector : Vector2 = selfEnemy.aim_direction.normalized()
+
+		for result in results:
+			var checkResult = result.collider
+			if checkResult.is_in_group('hitbox'):
+				checkResult = checkResult.get_parent()
+			if !checkResult.has_method('can_be_hit') || !checkResult.can_be_hit(testAttack):
+				continue
+			var angle = aimVector.angle_to(checkResult.global_position - selfEnemy.global_position)
+			var position = checkResult.global_position.distance_squared_to(selfEnemy.global_position)
+			var found
+			if(angle < closestAngle + 0.2):
+				if(angle < closestAngle):
+					closestAngle = angle
+					found = true
+				if(position < closestPosition):
+					found = true
+				if(found):
+					bestTargetResult = checkResult
+
+		return bestTargetResult
+			
+
 
 #lightningbolt params was in its own class_name file
 class LightningBoltParams:
@@ -332,6 +446,7 @@ class LightningBoltParams:
 	var finalBolt = false
 
 	var color = Color(1, 1, 1, 1)
+	var widthMult = 1
 
 	func duplicate():
 		var dup = LightningBoltParams.new()
@@ -345,6 +460,7 @@ class LightningBoltParams:
 		dup.alreadyBounced = alreadyBounced
 		dup.finalBolt = finalBolt
 		dup.color = color
+		dup.widthMult = widthMult
 		return dup
 
 	func chain(startPosition_, destination_, target_):

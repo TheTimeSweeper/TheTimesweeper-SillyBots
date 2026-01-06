@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6c5e37empmjr"
-path="res://.godot/imported/sTeslaBot_1.png-5603899291c31b75d566bac9e9fe6e1b.ctex"
+uid="uid://bau4cmcbtyc1a"
+path="res://.godot/imported/sTeslaBot_charge.png-4e962cb2b6d0605397494ce6c3f6b3a0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTeslaBot_1.png"
-dest_files=["res://.godot/imported/sTeslaBot_1.png-5603899291c31b75d566bac9e9fe6e1b.ctex"]
+source_file="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_charge.png"
+dest_files=["res://.godot/imported/sTeslaBot_charge.png-4e962cb2b6d0605397494ce6c3f6b3a0.ctex"]
 
 [params]
 

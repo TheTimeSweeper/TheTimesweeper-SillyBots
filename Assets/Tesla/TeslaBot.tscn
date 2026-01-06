@@ -1,21 +1,22 @@
-[gd_scene load_steps=131 format=3 uid="uid://dtbas3s8ymopi"]
+[gd_scene load_steps=143 format=3 uid="uid://dtbas3s8ymopi"]
 
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/TeslaBot.gd" id="1_trbqk"]
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/scripts/TeslaBotAI.gd" id="2_5ejwp"]
-[ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTeslaBot_1.png" id="3_jnx4g"]
-[ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/itesatta_01.wav" id="4_tcden"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBot.gd" id="1_trbqk"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBotAI.gd" id="2_5ejwp"]
+[ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_1.png" id="3_jnx4g"]
+[ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/itesatta_01.wav" id="4_tcden"]
 [ext_resource type="Texture2D" uid="uid://ckwjqiw24vvw5" path="res://Art/Characters/ShotgunnerRAM/Blast 1 40x43.png" id="7_tl15r"]
 [ext_resource type="Texture2D" uid="uid://cb0r386wk7p2p" path="res://Art/Characters/ShotgunnerRAM/New_Blast_40x55.png" id="8_74xpg"]
 [ext_resource type="PackedScene" uid="uid://dhyhd3wcgn6ql" path="res://Scenes/UI/AimIndicatorCircle.tscn" id="9_3qq83"]
-[ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_1.wav" id="10_5attc"]
-[ext_resource type="AudioStream" uid="uid://bqsotfhvwifnq" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_2.wav" id="11_1ogdr"]
+[ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_1.wav" id="10_5attc"]
+[ext_resource type="AudioStream" uid="uid://bqsotfhvwifnq" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_2.wav" id="11_1ogdr"]
 [ext_resource type="AudioStream" uid="uid://tj0puoybw60e" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_SPAWN.wav" id="11_gh88l"]
 [ext_resource type="AudioStream" uid="uid://d3xarhrbppnx8" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_Death.wav" id="12_hc7kf"]
-[ext_resource type="AudioStream" uid="uid://dpxi1vx15rgn7" path="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/ttrooper_primary_3.wav" id="12_whiix"]
+[ext_resource type="AudioStream" uid="uid://dpxi1vx15rgn7" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_3.wav" id="12_whiix"]
 [ext_resource type="PackedScene" uid="uid://b1ukkyv4lt0np" path="res://Scenes/Hosts/Effects/EnemyFX.tscn" id="13_svnk1"]
 [ext_resource type="Texture2D" uid="uid://kek2465qusef" path="res://Art/Environment/Sci-fi Animations/clear moon sprite.png" id="14_a61hh"]
 [ext_resource type="Texture2D" uid="uid://nmye71xp116l" path="res://Art/Shields/swap shield PEN.png" id="15_x5sck"]
 [ext_resource type="Texture2D" uid="uid://cv734mstudjkd" path="res://Art/Lights/LowRes/ShotgunnerEye.png" id="16_876av"]
+[ext_resource type="Texture2D" uid="uid://bau4cmcbtyc1a" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_charge.png" id="17_7hj23"]
 
 [sub_resource type="Shader" id="Shader_m2138"]
 code = "shader_type canvas_item;
@@ -96,6 +97,60 @@ colors = PackedColorArray(1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0)
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ni7vv"]
 radius = 2.5
 height = 5.0
+
+[sub_resource type="Animation" id="Animation_q3tnd"]
+resource_name = "Charge_Loop"
+length = 0.393
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:vframes")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [6]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [24]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite:hframes")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [12]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ChargeSprite:offset")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [Vector2(0, 0)]
+}
 
 [sub_resource type="Animation" id="Animation_0jufg"]
 resource_name = "Die"
@@ -246,7 +301,7 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_k5pit"]
 resource_name = "Shoot"
-length = 0.7
+length = 0.9015
 step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -267,10 +322,10 @@ tracks/1/path = NodePath("Sprite:frame")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 4.36051),
+"transitions": PackedFloat32Array(1, 1),
 "update": 1,
-"values": [24]
+"values": [26, 25]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -450,6 +505,7 @@ tracks/2/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_l2i84"]
 _data = {
+"Charge_Loop": SubResource("Animation_q3tnd"),
 "Die": SubResource("Animation_0jufg"),
 "Idle": SubResource("Animation_m0ney"),
 "RESET": SubResource("Animation_6rkru"),
@@ -623,8 +679,9 @@ height = 25.0
 radius = 16.0
 height = 38.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_pj5at"]
-radius = 27.3
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_dhsrb"]
+radius = 9.99972
+height = 94.0124
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_jn4w2"]
 playback_mode = 1
@@ -1179,6 +1236,77 @@ hue_variation_max = 0.25
 anim_speed_min = 0.48
 anim_speed_max = 0.73
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_gopq5"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(0, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aua3a"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(18, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qkew1"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(36, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b6wf8"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(54, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_geo3o"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(72, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lyool"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(90, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fgit5"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(108, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sstmx"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(126, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xkxk6"]
+atlas = ExtResource("17_7hj23")
+region = Rect2(144, 0, 18, 18)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fmjbt"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gopq5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aua3a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qkew1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b6wf8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_geo3o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lyool")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fgit5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sstmx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xkxk6")
+}],
+"loop": false,
+"name": &"default",
+"speed": 3.0
+}]
+
 [node name="TeslaBot" type="CharacterBody2D" groups=["enemy", "enemylike", "host"]]
 z_index = 80
 collision_mask = 264
@@ -1258,12 +1386,11 @@ shape = SubResource("CapsuleShape2D_86oa0")
 position = Vector2(0, 3)
 scale = Vector2(1, 0.65)
 
-[node name="ShapeCast2D" type="ShapeCast2D" parent="."]
-enabled = false
-shape = SubResource("CircleShape2D_pj5at")
-target_position = Vector2(10.88, 62.91)
-max_results = 1
-collide_with_areas = true
+[node name="LightningScanCollision" type="CollisionShape2D" parent="."]
+position = Vector2(0, 30)
+rotation = -0.0075053
+shape = SubResource("CapsuleShape2D_dhsrb")
+disabled = true
 
 [node name="SpawnAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("11_gh88l")
@@ -1322,6 +1449,10 @@ process_material = SubResource("ParticleProcessMaterial_y5cnd")
 visible = false
 position = Vector2(9, -2.5)
 texture = ExtResource("16_876av")
+
+[node name="ChargeSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(9.275, 1.485)
+sprite_frames = SubResource("SpriteFrames_fmjbt")
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_finished"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

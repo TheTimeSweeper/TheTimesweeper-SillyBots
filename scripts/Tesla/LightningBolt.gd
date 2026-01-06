@@ -59,8 +59,7 @@ func _fire(fireLightningBoltParams):
 	line2d = get_node("LightningTrail")
 	line2d.points = [startPosition]
 	line2d.default_color = lightningBoltParams.color
-	if lightningBoltParams.finalBolt:
-		line2d.width *= 3
+	line2d.width *= lightningBoltParams.widthMult
 	startWidth = line2d.width
 
 	totalDistance = startPosition.distance_to(destination)
@@ -170,7 +169,7 @@ func fireNewBolt(all = false, oll = false):
 		# fire from all nearby conductors to the current target
 		if candidate in conductor_candidates && oll:
 			
-			# todo pull this out of the for loop but also do the `all` thing a little better
+			# todo pull this out of the for loop but also do the `oll` thing a little better
 			var params = attack.causality.source.create_lightningboltparams()
 			params.source = attack.causality.source
 			params.damage = attack.damage

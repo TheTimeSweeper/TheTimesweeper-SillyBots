@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwqyvd8yy6ykb"
-path="res://.godot/imported/range_circle.png-85a808897903153997b66c1f3add008c.ctex"
+path="res://.godot/imported/range_circle.png-5aa8fb422553ea3d8ba1c90d622ff4e6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/range_circle.png"
-dest_files=["res://.godot/imported/range_circle.png-85a808897903153997b66c1f3add008c.ctex"]
+source_file="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/range_circle.png"
+dest_files=["res://.godot/imported/range_circle.png-5aa8fb422553ea3d8ba1c90d622ff4e6.ctex"]
 
 [params]
 

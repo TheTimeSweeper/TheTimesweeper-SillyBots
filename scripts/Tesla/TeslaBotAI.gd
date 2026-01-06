@@ -4,16 +4,16 @@ extends EnemyAI
 enum States {
 	REPOSITION,
 	SHOOT,
-	CONDUCTOR,
 	NAVIGATE_WITHIN_GUN_RANGE,
 	
-	RUN_AND_GUN,
+	# RUN_AND_GUN,
 }
 
-const INITIAL_STATES = [States.REPOSITION, States.CONDUCTOR]
+const INITIAL_STATES = [States.REPOSITION, States.SHOOT]
 
-const MAX_FIRING_RANGE = 300
-const IDEAL_FIRING_RANGE = 150
+const MAX_FIRING_RANGE = 120
+const IDEAL_FIRING_RANGE = 100
+const CONDUCTOR_RANGE = 100
 
 var reposition_point = Vector2.ZERO
 
@@ -22,6 +22,8 @@ func initialize(body_, starting_conditions = null):
 		print("ERROR: Tesla AI is not compatible with node: ", body_)
 		return
 		
+	auto_aim_toward_foe = false	
+
 	super(body_, starting_conditions)
 	
 	states[States.REPOSITION] = {
@@ -38,52 +40,43 @@ func initialize(body_, starting_conditions = null):
 			follow_nav_path()
 			
 			if navigation.at_destination() or state_timer < 0:
-				#Melee will be disabled unil we have a better way to telegraph the attack
-				if false: #dist_to_foe < 50 and randf() < 0.5:
-					set_state(States.CONDUCTOR)
-				else:
-					set_state(States.SHOOT)
+				set_state(States.SHOOT)
 	}
 	
 	states[States.SHOOT] = {
 		ENTER: func():
+			body.aim_direction = to_foe
+			if should_throw_conductor():
+				body.throw_conductor()
 			state_timer = 0.5 - 0.2*AI_level,
 		
 		PROCESS: func():
-			if state_timer < 0:
+			body.aim_direction = aim_toward_foe_at_speed(2*PI)
+			if state_timer < 1:
 				if can_shoot():
-					body.shoot()
+					do_a_shoot()
 					exit_behaviour(COMPLETED, max(0.0, 0.5 - 0.25*AI_level))
 				else:
 					exit_behaviour(ABORTED) 
 	}
 	
-	states[States.RUN_AND_GUN] = {
-		ENTER: func():
-			body.velocity *= -1
-			state_timer = randf()*2.0 + 1.0,
+	# states[States.RUN_AND_GUN] = {
+	# 	ENTER: func():
+	# 		body.velocity *= -1
+	# 		state_timer = randf()*2.0 + 1.0,
 			
-		PROCESS: func():
-			var circle_dir = sign(body.velocity.cross(to_foe))
-			move_toward_point(foe_pos + (-to_foe).limit_length(IDEAL_FIRING_RANGE).rotated(0.01*circle_dir))
+	# 	PROCESS: func():
+	# 		var circle_dir = sign(body.velocity.cross(to_foe))
+	# 		move_toward_point(foe_pos + (-to_foe).limit_length(IDEAL_FIRING_RANGE).rotated(0.01*circle_dir))
 			
-			if can_shoot():
+	# 		if can_shoot():
 					
-				body.aim_direction = body.global_position.direction_to(foe.global_position)
-				body.shoot()
+	# 			body.aim_direction = body.global_position.direction_to(foe.global_position)
+	# 			do_a_shoot()
 				
-			if state_timer < 0.0:
-				exit_behaviour(COMPLETED)
-			
-	}
-	
-	states[States.CONDUCTOR] = {
-		ENTER: func():
-			body.throw_conductor(),
-		
-		PROCESS: func():
-			exit_behaviour(COMPLETED, 0.5)		
-	}
+	# 		if state_timer < 0.0:
+	# 			exit_behaviour(COMPLETED)
+	# }
 	
 	states[States.NAVIGATE_WITHIN_GUN_RANGE] = {
 		ENTER: func():
@@ -127,13 +120,24 @@ func get_weighted_behaviour_options_for_golem():
 		behaviours.append([States.NAVIGATE_WITHIN_GUN_RANGE, 1.0])
 		
 	behaviours.append([States.REPOSITION, 0.5])
-	behaviours.append([States.RUN_AND_GUN, 0.5])
-	behaviours.append([States.CONDUCTOR, 0.5])
+	# behaviours.append([States.RUN_AND_GUN, 0.5])
 		
 	return behaviours
 	
+func aim_toward_foe_at_speed(aim_speed):
+	if aim_speed <= 0.0: return body.aim_direction 
+	var error_angle = body.aim_direction.angle_to(dir_to_foe)
+	return body.aim_direction.rotated(min(abs(error_angle), aim_speed*delta)*sign(error_angle))
+
+func do_a_shoot():
+	if can_shoot():
+		body.shoot()
+
+func should_throw_conductor() -> bool:
+	return body.special_cooldown < (-2 + AI_level) && range_from_entity_reachable(foe, CONDUCTOR_RANGE) && body.check_conductor_count() <= AI_level
+
 func can_shoot():
-	return on_screen()
+	return dist_to_foe < MAX_FIRING_RANGE && on_screen()
 	
 func find_reposition_point():
 	var move_towards_foe = dist_to_foe > IDEAL_FIRING_RANGE
