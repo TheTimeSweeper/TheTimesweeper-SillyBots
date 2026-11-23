@@ -1,10 +1,12 @@
-[gd_scene load_steps=105 format=3 uid="uid://dg2ykivn3vdlo"]
+[gd_scene load_steps=124 format=3 uid="uid://dg2ykivn3vdlo"]
 
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Base/BaseBot.gd" id="1_52788"]
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBotAI.gd" id="2_n1ygx"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Combo/ComboBot.gd" id="1_8hq0j"]
+[ext_resource type="Script" path="res://Scripts/Hosts/EnemyAI.gd" id="2_n3mcm"]
 [ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_1.png" id="3_2c5yn"]
 [ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/itesatta_01.wav" id="4_24q76"]
+[ext_resource type="Texture2D" uid="uid://cf4iuwqqsi0rw" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Combo/Swipe.png" id="4_q3xeu"]
 [ext_resource type="PackedScene" uid="uid://dhyhd3wcgn6ql" path="res://Scenes/UI/AimIndicatorCircle.tscn" id="5_20ben"]
+[ext_resource type="Texture2D" uid="uid://bau4cmcbtyc1a" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_charge.png" id="6_1vjsy"]
 [ext_resource type="AudioStream" uid="uid://tj0puoybw60e" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_SPAWN.wav" id="6_wwo8e"]
 [ext_resource type="AudioStream" uid="uid://d3xarhrbppnx8" path="res://Sounds/SoundEffects/Tom/ShotgunBot/RAM_ShotgunBot_Death.wav" id="7_vsipk"]
 [ext_resource type="AudioStream" uid="uid://wpbl7e1prosj" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/ttrooper_primary_1.wav" id="8_7of8y"]
@@ -14,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://kek2465qusef" path="res://Art/Environment/Sci-fi Animations/clear moon sprite.png" id="12_cstuw"]
 [ext_resource type="Texture2D" uid="uid://nmye71xp116l" path="res://Art/Shields/swap shield PEN.png" id="13_nc1k3"]
 [ext_resource type="Texture2D" uid="uid://cv734mstudjkd" path="res://Art/Lights/LowRes/ShotgunnerEye.png" id="14_kq2jx"]
+[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillStateMachine.gd" id="14_pn3k6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ni7vv"]
 radius = 2.5
@@ -432,6 +435,109 @@ height = 25.0
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_86oa0"]
 radius = 16.0
 height = 38.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_f6ika"]
+radius = 20.0
+height = 46.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nhnnl"]
+height = 82.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_guse0"]
+radius = 33.0152
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p3k5d"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(0, 0, 27, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbjnb"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(27, 0, 27, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_taci4"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(54, 0, 27, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w58oh"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(81, 0, 27, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8e1sv"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(108, 0, 27, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3y4eo"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(135, 0, 27, 45)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_x8p2i"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p3k5d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vbjnb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_taci4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w58oh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8e1sv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3y4eo")
+}],
+"loop": false,
+"name": &"default",
+"speed": 24.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2lpvu"]
+atlas = ExtResource("6_1vjsy")
+region = Rect2(0, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qyfek"]
+atlas = ExtResource("6_1vjsy")
+region = Rect2(54, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vb8a"]
+atlas = ExtResource("6_1vjsy")
+region = Rect2(108, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3apfj"]
+atlas = ExtResource("6_1vjsy")
+region = Rect2(144, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lm3bh"]
+atlas = ExtResource("4_q3xeu")
+region = Rect2(144, 0, 18, 18)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kn4vd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2lpvu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qyfek")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vb8a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3apfj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lm3bh")
+}],
+"loop": false,
+"name": &"default",
+"speed": 18.0
+}]
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_jn4w2"]
 playback_mode = 1
@@ -986,14 +1092,14 @@ hue_variation_max = 0.25
 anim_speed_min = 0.48
 anim_speed_max = 0.73
 
-[node name="BaseBot" type="CharacterBody2D" groups=["enemy", "enemylike", "host"]]
+[node name="ComboBot" type="CharacterBody2D" groups=["enemy", "enemylike", "host"]]
 z_index = 80
 collision_mask = 264
-script = ExtResource("1_52788")
+script = ExtResource("1_8hq0j")
 ignore_skin = true
 
 [node name="AI" type="Node2D" parent="."]
-script = ExtResource("2_n1ygx")
+script = ExtResource("2_n3mcm")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 modulate = Color(1.2, 1.2, 1.2, 1)
@@ -1031,8 +1137,48 @@ collision_layer = 67108864
 position = Vector2(0, 3)
 shape = SubResource("CapsuleShape2D_86oa0")
 
+[node name="MeleeCollider" type="Area2D" parent="."]
+position = Vector2(0, 3)
+collision_layer = 0
+collision_mask = 4
+
+[node name="WideAttack" type="CollisionShape2D" parent="MeleeCollider"]
+position = Vector2(14, 0)
+shape = SubResource("CapsuleShape2D_f6ika")
+disabled = true
+
+[node name="LongAttack" type="CollisionShape2D" parent="MeleeCollider"]
+position = Vector2(24, 0)
+rotation = -1.5708
+shape = SubResource("CapsuleShape2D_nhnnl")
+disabled = true
+
+[node name="AreaAttack" type="CollisionShape2D" parent="MeleeCollider"]
+rotation = 0.063539
+shape = SubResource("CircleShape2D_guse0")
+disabled = true
+
+[node name="WideSwipeSprite" type="AnimatedSprite2D" parent="MeleeCollider"]
+position = Vector2(18, 0)
+sprite_frames = SubResource("SpriteFrames_x8p2i")
+frame = 5
+frame_progress = 1.0
+
+[node name="LongSwipeSprite" type="AnimatedSprite2D" parent="MeleeCollider"]
+position = Vector2(24, 0)
+scale = Vector2(2.88889, 0.444444)
+sprite_frames = SubResource("SpriteFrames_x8p2i")
+frame = 5
+frame_progress = 1.0
+
+[node name="AreaSwipeSprite" type="AnimatedSprite2D" parent="MeleeCollider"]
+position = Vector2(0.999998, 0)
+scale = Vector2(4, 4.11111)
+sprite_frames = SubResource("SpriteFrames_kn4vd")
+frame = 4
+frame_progress = 1.0
+
 [node name="AimIndicator" parent="." instance=ExtResource("5_20ben")]
-visible = false
 position = Vector2(0, 3)
 scale = Vector2(1, 0.65)
 
@@ -1093,6 +1239,9 @@ process_material = SubResource("ParticleProcessMaterial_y5cnd")
 visible = false
 position = Vector2(9, -2.5)
 texture = ExtResource("14_kq2jx")
+
+[node name="MeleeStateMachine" type="Node" parent="."]
+script = ExtResource("14_pn3k6")
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_finished"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

@@ -1,7 +1,9 @@
 class_name SkillState
 
 var outer
+var outerBody
 var age = 0
+
 func _onEnter():
 	pass
 

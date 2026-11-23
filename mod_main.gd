@@ -19,11 +19,13 @@ var extensions_dir_path := ""
 var translations_dir_path := ""
 
 const tesla_bot_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/TeslaBot.tscn"
-const default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTesla.png"
+const tesla_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTesla.png"
 
 const combo_bot_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Combo/ComboBot.tscn"
+const combo_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTesla.png"
 
-var teslabot 
+var teslabot
+var comboBot
 
 var contentContainer : Node
 var sillyBusiness
@@ -38,6 +40,10 @@ func _init() -> void:
 	# Add extensions
 	install_script_extensions()
 	install_script_hook_files()
+	
+func _ready():
+	contentContainer = get_node("/root/ModLoader/TheTimesweeper-CustomEnemyAPI/ContentContainer")
+	contentContainer.initialize.connect(add_enemy)
 
 # thanks brotato https://wiki.godotmodding.com/guides/modding/global_classes_and_child_nodes/
 func add_child_class():
@@ -49,15 +55,23 @@ func add_enemy():
 	teslabot = contentContainer.create_new_enemyDef()
 	teslabot.name = "TeslaTrooper"
 	teslabot.scene_path = tesla_bot_path
-	teslabot.default_skin_path = default_skin_path
+	teslabot.default_skin_path = tesla_skin_path
 	teslabot.spawn_level = 1
 	teslabot.fitness_score = 50
 	teslabot.spawn_weight = 1
-
+	
+	#having added a second bot, this shit sucks
 	contentContainer.add_enemyDef(teslabot)
-
-	#var sillyBusiness = get_node("/root/ModLoader/TheTimesweeper-SillyBots/SillyBusiness")
 	sillyBusiness.teslabot = teslabot
+
+	comboBot = contentContainer.create_new_enemyDef()
+	comboBot.name = "Koalesk"
+	comboBot.scene_path = combo_bot_path
+	comboBot.default_skin_path = combo_skin_path
+	comboBot.spawn_level = 1
+
+	contentContainer.add_enemyDef(comboBot)
+	sillyBusiness.comboBot = comboBot
 
 func install_script_extensions() -> void:
 	# ! any script extensions should go in this directory, and should follow the same directory structure as vanilla
@@ -73,9 +87,3 @@ func install_script_hook_files() -> void:
 	extensions_dir_path = mod_dir_path.path_join("extensions")
 	#ModLoaderMod.install_script_hooks("res://main.gd", extensions_dir_path.path_join("main.gd"))
 	ModLoaderMod.install_script_hooks("res://Scripts/Hosts/ShieldBot/ShieldBot.gd", extensions_dir_path.path_join("Scripts/Hosts/ShieldBot/ShieldBot.hooks.gd"))
-
-
-func _ready():
-	
-	contentContainer = get_node("/root/ModLoader/TheTimesweeper-CustomEnemyAPI/ContentContainer")
-	contentContainer.initialize.connect(add_enemy)

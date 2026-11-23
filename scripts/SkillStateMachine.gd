@@ -1,5 +1,7 @@
 extends Node 
 
+@onready var outerBody = get_parent()
+
 var currentState = null
 var nextState
 
@@ -7,12 +9,12 @@ func setState(state):
 	nextState = state
 
 func update(delta):
-
 	if(nextState != currentState):
 		if currentState:
 			currentState._onExit()
 		if nextState:
 			nextState.outer = self
+			nextState.outerBody = outerBody
 			nextState._onEnter()
 		currentState = nextState
 		

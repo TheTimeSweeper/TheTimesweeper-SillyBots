@@ -1,7 +1,6 @@
-[gd_scene load_steps=105 format=3 uid="uid://c3xnxd8yirdju"]
+[gd_scene load_steps=104 format=3 uid="uid://c3xnxd8yirdju"]
 
 [ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Base/BaseBot.gd" id="1_rmq5w"]
-[ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBotAI.gd" id="2_k5om3"]
 [ext_resource type="Texture2D" uid="uid://c6c5e37empmjr" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_1.png" id="3_j33a0"]
 [ext_resource type="AudioStream" uid="uid://xxq2gobde776" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/itesatta_01.wav" id="4_y556w"]
 [ext_resource type="PackedScene" uid="uid://dhyhd3wcgn6ql" path="res://Scenes/UI/AimIndicatorCircle.tscn" id="7_h1ydt"]
@@ -993,7 +992,6 @@ script = ExtResource("1_rmq5w")
 ignore_skin = true
 
 [node name="AI" type="Node2D" parent="."]
-script = ExtResource("2_k5om3")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 modulate = Color(1.2, 1.2, 1.2, 1)
