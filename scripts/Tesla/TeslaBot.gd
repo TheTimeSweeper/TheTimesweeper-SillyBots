@@ -6,8 +6,10 @@ extends Enemy
 @onready var shootAudio1 = $ShootAudio
 @onready var shootAudio2 = $ShootAudio2
 @onready var lightningScanCollision : CollisionShape2D = $LightningScanCollision
-@onready var chargeSprite : AnimatedSprite2D = $ChargeSprite
+@onready var chargeSprite : AnimatedSprite2D = $AimIndicator/ChargeSprite
 @onready var primaryStateMachine = $PrimaryStateMachine
+
+@export var lightning_distance_curve: Curve
 
 var default_skin_path = "res://mods-unpacked/TheTimesweeper-SillyBots/Tesla/sTesla.png"
 # var red_skin_path = "res://Art/Characters/ShotgunnerRAM/Red 63x113.png"
@@ -37,11 +39,11 @@ var charge_sprite_offset = 11.275
 var lightning_damage = 4
 var lightning_damage_final_mult = 4
 
-var charged_lightning_min_damage = 2
-var charged_lightning_max_damage = 10
-var charged_lightning_charge_time = 3
+var charged_lightning_min_range = 2
+var charged_lightning_max_range = 250
+var charged_lightning_charge_time = 1
 
-var lightning_max_range = 180
+var lightning_max_range = 180 #no longer used. dynamic
 var lightning_walk_speed = 90
 var lightning_travelTime = 0.1
 
@@ -62,7 +64,8 @@ var holding_primary = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
-	enemy_type = GameManager.teslabotIndex
+	# enemy type set by CustomEnemyAPI 
+	# enemy_type = GameManager.teslabotIndex
 	if not is_previous_floor_host: max_health = 75
 	accel = 10
 	max_speed = 120
@@ -82,11 +85,11 @@ func toggle_playerhood(state):
 	update_aim_indicator_visibility()
 		
 func update_aim_indicator_visibility():
-	# aim_indicator.visible = should_show_aim_indicator()
+	aim_indicator.visible = should_show_aim_indicator()
 	pass
 	
 func should_show_aim_indicator():
-	return super() and SaveManager.settings.steeltoe_aiming_reticle
+	return super() != null && super() #and SaveManager.settings.steeltoe_aiming_reticle
 	
 # As far as I can tell here state is really is_player?
 func toggle_enhancement(state):
@@ -117,10 +120,9 @@ func _physics_process(delta):
 func player_action():
 
 	holding_primary = Input.is_action_pressed("attack1")
-	
 	if holding_primary:
 		charge_shoot()
-		
+	
 	if Input.is_action_just_released("attack2") and special_cooldown < 0:
 		throw_conductor()
 		
@@ -243,7 +245,7 @@ func revive():
 
 func update_look_direction(dir):
 	super.update_look_direction(dir)
-	chargeSprite.position.x = -charge_sprite_offset if facing_left else charge_sprite_offset
+	#chargeSprite.position.x = -charge_sprite_offset if facing_left else charge_sprite_offset
 
 	
 func update_aim_indicators():
@@ -266,6 +268,7 @@ func create_lightningboltparams():
 class ChargeLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillState.gd":
 	var selfEnemy
 	var charge
+	var range
 
 	func _onEnter():
 		selfEnemy.play_animation("Charge_Loop")
@@ -273,33 +276,39 @@ class ChargeLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scri
 		selfEnemy.attacking = true
 		selfEnemy.chargeSprite.visible = true
 		selfEnemy.chargeSprite.frame = 0
-		selfEnemy.chargeSprite.play("default")
 
 	func _onUpdate(delta):
 		super._onUpdate(delta)
 
+		var clampedAge = clamp(age, 0, selfEnemy.charged_lightning_charge_time)
+		charge = clampedAge/selfEnemy.charged_lightning_charge_time
+		range = lerp(selfEnemy.charged_lightning_min_range, 
+							   selfEnemy.charged_lightning_max_range, 
+							   selfEnemy.lightning_distance_curve.sample(charge))
+
+		selfEnemy.chargeSprite.frame = charge * 8
+		selfEnemy.chargeSprite.position.x = range
+
 		if !selfEnemy.holding_primary:
 			release()
-		if !selfEnemy.was_recently_player() && age > selfEnemy.charged_lightning_charge_time:
+		if !selfEnemy.is_player && selfEnemy.was_recently_player(): # && age > selfEnemy.charged_lightning_charge_time:
 			release() 
 
 	func release():
 		var newState = FireLightning.new()
 		newState.selfEnemy = selfEnemy
-		var clampedAge = clamp(age, 0, selfEnemy.charged_lightning_charge_time)
-		newState.damage = lerp(selfEnemy.charged_lightning_min_damage, selfEnemy.charged_lightning_max_damage, clampedAge/selfEnemy.charged_lightning_charge_time)
+		newState.range = range
 
 		outer.setState(newState)
 	func _onExit():
 		selfEnemy.cancel_effect(EffectType.SPEED_OVERRIDE, selfEnemy)
-		selfEnemy.chargeSprite.visible = false
 
 class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillState.gd":
 	var selfEnemy : TeslaBot = null
 
 	var interval = 0.12
-	var shots = 5
-	var baseDuration = 0.9
+	var shots = 3
+	var baseDuration = 0.3
 
 	var timer = 0
 	var shotsFired = 0
@@ -310,6 +319,7 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 	var space_state
 	var query
 	var damage
+	var range
 
 	func _onEnter():
 		selfEnemy.attacking = true
@@ -317,7 +327,7 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 		selfEnemy.apply_effect(EffectType.SPEED_OVERRIDE, selfEnemy, selfEnemy.lightning_walk_speed)
 
 		scanCollision = selfEnemy.lightningScanCollision
-		scanCollision.shape.height = selfEnemy.lightning_max_range
+		scanCollision.shape.height = range
 		scanCollision.shape.radius = selfEnemy.lightning_scan_radius
 
 		excluded = selfEnemy.get_node('Hitbox')
@@ -359,12 +369,13 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 	func _onExit():
 		selfEnemy.attacking = false
 		selfEnemy.cancel_effect(EffectType.SPEED_OVERRIDE, selfEnemy)
+		selfEnemy.chargeSprite.visible = false
 	
 	func shoot_lightning():
 		
 		# selfEnemy.shootAudio2.play()
 
-		var toPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * selfEnemy.lightning_max_range)
+		var toPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * range)
 
 		var resultPosition = toPosition
 

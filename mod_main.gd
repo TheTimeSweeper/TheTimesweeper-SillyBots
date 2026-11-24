@@ -56,6 +56,7 @@ func add_enemy():
 	teslabot.name = "TeslaTrooper"
 	teslabot.scene_path = tesla_bot_path
 	teslabot.default_skin_path = tesla_skin_path
+	teslabot.ai_type = TeslaBotAI
 	teslabot.spawn_level = 1
 	teslabot.fitness_score = 50
 	teslabot.spawn_weight = 1
@@ -64,14 +65,14 @@ func add_enemy():
 	contentContainer.add_enemyDef(teslabot)
 	sillyBusiness.teslabot = teslabot
 
-	comboBot = contentContainer.create_new_enemyDef()
-	comboBot.name = "Koalesk"
-	comboBot.scene_path = combo_bot_path
-	comboBot.default_skin_path = combo_skin_path
-	comboBot.spawn_level = 1
+	# comboBot = contentContainer.create_new_enemyDef()
+	# comboBot.name = "Koalesk"
+	# comboBot.scene_path = combo_bot_path
+	# comboBot.default_skin_path = combo_skin_path
+	# comboBot.spawn_level = 1
 
-	contentContainer.add_enemyDef(comboBot)
-	sillyBusiness.comboBot = comboBot
+	# contentContainer.add_enemyDef(comboBot)
+	# sillyBusiness.comboBot = comboBot
 
 func install_script_extensions() -> void:
 	# ! any script extensions should go in this directory, and should follow the same directory structure as vanilla
