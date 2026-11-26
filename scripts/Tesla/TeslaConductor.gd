@@ -6,6 +6,7 @@ extends PhysicsProjectile
 
 @onready var sprite = $AnimatedSprite2D
 @onready var rangeSprite = $RangeSprite
+@onready var chargeSprite = $ChargeSprite
 
 #not used anymroe cause class_name does not work in mods. maybe in the future conductors are global and you can use enemy conductors and stuff that'd be cool
 static var instances_list = []
@@ -26,6 +27,7 @@ var destination
 var was_player_appearance = null
 
 var remainingHits = 1
+var absorbedDamage = 0
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	instances_list.append(self)
@@ -60,6 +62,16 @@ func take_hit():
 # # Called every frame. 'delta' is the elapsed time since the previous frame.
 # func _process(delta):
 # 	pass
+
+func absorb_damage(absorbing):
+	absorbedDamage += absorbing;
+	chargeSprite.frame = absorbedDamage/100
+
+func consume_stored_damage():
+	var absorbed = absorbedDamage
+	absorbedDamage = 0
+	chargeSprite.frame = 0
+	return absorbed
 
 func on_hit_terrain(_body):
 	pass

@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://dla5i3nu5kpku"]
+[gd_scene load_steps=24 format=3 uid="uid://dla5i3nu5kpku"]
 
 [ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaConductor.gd" id="1_b80sl"]
 [ext_resource type="Texture2D" uid="uid://r7kq7d4ocpbc" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaConductor.png" id="2_aiom4"]
 [ext_resource type="Texture2D" uid="uid://cvd31jmouvant" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaConductorEvil.png" id="3_2jcui"]
 [ext_resource type="Texture2D" uid="uid://cwqyvd8yy6ykb" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/range_circle.png" id="3_pahl3"]
 [ext_resource type="AudioStream" uid="uid://dc5dhug1qu2vn" path="res://Sounds/SoundEffects/Tom/WheelBot/RAM_wheelbotGrenadeImpact.wav" id="5_a88t3"]
+[ext_resource type="Texture2D" uid="uid://bau4cmcbtyc1a" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_charge.png" id="6_br0d6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spxff"]
 size = Vector2(6, 16)
@@ -53,6 +54,77 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_4slp6"]
 radius = 100.0
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_gopq5"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(0, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aua3a"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(18, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qkew1"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(36, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b6wf8"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(54, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_geo3o"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(72, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lyool"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(90, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fgit5"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(108, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sstmx"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(126, 0, 18, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xkxk6"]
+atlas = ExtResource("6_br0d6")
+region = Rect2(144, 0, 18, 18)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_auhvh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gopq5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aua3a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qkew1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b6wf8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_geo3o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lyool")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fgit5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sstmx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xkxk6")
+}],
+"loop": false,
+"name": &"default",
+"speed": 0.0
+}]
+
 [node name="Conductor" type="Area2D" groups=["physics projectile"]]
 z_index = 1
 collision_layer = 4
@@ -96,5 +168,10 @@ shape = SubResource("RectangleShape2D_spxff")
 visible = false
 shape = SubResource("CircleShape2D_4slp6")
 disabled = true
+
+[node name="ChargeSprite" type="AnimatedSprite2D" parent="."]
+z_index = -1
+position = Vector2(0, 4)
+sprite_frames = SubResource("SpriteFrames_auhvh")
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]

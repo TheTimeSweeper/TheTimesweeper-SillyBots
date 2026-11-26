@@ -73,7 +73,8 @@ func _fire(fireLightningBoltParams):
 	if attack.causality.source.is_player:
 		GameManager.camera.set_trauma(max(GameManager.camera.trauma + trauma_add, trauma_min), 10)
 
-	if attack.can_hit(target) && remainingBounces > -1:
+	if finalBolt && attack.can_hit(target) && !lightningBoltParams.fromConductor:
+		#fire from conductors.
 		fireNewBolt(false, true)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -113,23 +114,14 @@ func _process(delta):
 			if (attack_hit) && remainingBounces > 0:
 				remainingBounces -= 1
 				fireNewBolt()
-			if false: # target is TeslaConductor:
-				# don't spend a bounce on conductors
-				fireNewBolt()
-				# fireNewBolt(true) likely an upgrade calls this
-				if finalBolt:
-					fireNewBolt(true)
-					target.take_hit()
-				# if target not in alreadyBounced:
-				# 	remainingBounces += 2 # when bouncing on conductor, extend charge
-				# else:
-				# 	remainingBounces += 1 # already bounced off this. allow bounce again, but dont lose charge
-			
-
-	# global_position = startPosition.lerp(destination, t)
-	# line2d.points[currentLinePoint] = startPosition.lerp(destination, t)
+			if target is TeslaConductor:
+				# don't bounce off conductor. uncomment to reenable
+				# if remainingBounces > 0:
+				# 	remainingBounces -= 1
+				# 	fireNewBolt()
+				target.absorb_damage(attack.damage)
 				
-func fireNewBolt(all = false, oll = false):
+func fireNewBolt(toAll = false, fromAllConductors = false):
 	alreadyBounced.append(target)
 	# get all nearby enemies
 	var enemy_candidates = Violence.get_targetable_enemies_in_radius(attack.causality.source, destination, 100)
@@ -154,42 +146,50 @@ func fireNewBolt(all = false, oll = false):
 			continue
 		if conductor.global_position.distance_to(destination) > 100:
 			continue
+		if conductor == lightningBoltParams.inflictor:
+			continue
 		if conductor in alreadyBounced: 
 			conductor_candidates_used.append(conductor)
 		else:
 			conductor_candidates_free.append(conductor)
 
 	# prioritize targets in this order
-	var candidates = conductor_candidates_free + enemy_candidates_free + enemy_candidates_used + (conductor_candidates_used if not all else []) 
+	var candidates = conductor_candidates_free + enemy_candidates_free + enemy_candidates_used + (conductor_candidates_used if not toAll else []) 
 	var finalCandidate = null
 	for candidate in candidates:
 		# if candidate in alreadyBounced && not candidate is TeslaConductor: continue
 		if candidate == attack.causality.source: continue
 		if candidate == target: continue
+
 		# fire from all nearby conductors to the current target
-		if candidate in conductor_candidates && oll:
-			
-			# todo pull this out of the for loop but also do the `oll` thing a little better
+		if candidate in conductor_candidates && fromAllConductors:
+			var storedDamage = candidate.consume_stored_damage()
+			if storedDamage <= 0:
+				continue
 			var params = attack.causality.source.create_lightningboltparams()
 			params.source = attack.causality.source
-			params.damage = attack.damage
+			params.damage = storedDamage
 			params.travelTime = lightning_travelTime
+			params.inflictor = candidate
 			params.startPosition = candidate.global_position
 			params.destination = destination
 			params.target = target
-			params.remainingBounces = -1
+			params.remainingBounces = 2
 			params.alreadyBounced = []
 			params.color = Color(0, 1, 1, 1)
+			params.fromConductor = true
 
 			attack.causality.source.fire_lightning(params)
-		else: if all:
+
+		# spread to all valid candidates
+		else: if toAll:
 			
-			# todo pull this out of the for loop but also do the `all` thing a little better
 			var params = attack.causality.source.create_lightningboltparams()
 			params.source = attack.causality.source
 			params.damage = attack.damage
 			params.travelTime = lightning_travelTime
 			params.startPosition = destination
+			params.inflictor = attack.causality.source
 			params.destination = candidate.global_position
 			params.target = candidate
 			params.remainingBounces = 0
@@ -197,11 +197,11 @@ func fireNewBolt(all = false, oll = false):
 			params.color = Color(0, 1, 1, 1)
 
 			attack.causality.source.fire_lightning(params)
-		else: if not candidate in conductor_candidates:
+		else: # if not candidate in conductor_candidates:
 			finalCandidate = candidate
 			break
 
-	if finalCandidate && !oll:
+	if finalCandidate && !fromAllConductors:
 		
 		var params = lightningBoltParams.duplicate().chain(destination, finalCandidate.global_position, finalCandidate)
 

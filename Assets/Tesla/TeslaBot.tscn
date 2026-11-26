@@ -1,4 +1,4 @@
-[gd_scene load_steps=122 format=3 uid="uid://dtbas3s8ymopi"]
+[gd_scene load_steps=123 format=3 uid="uid://dtbas3s8ymopi"]
 
 [ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBot.gd" id="1_trbqk"]
 [ext_resource type="Script" path="res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/Tesla/TeslaBotAI.gd" id="2_5ejwp"]
@@ -18,8 +18,8 @@
 [ext_resource type="Texture2D" uid="uid://bau4cmcbtyc1a" path="res://mods-unpacked/TheTimesweeper-SillyBots/Assets/Tesla/sTeslaBot_charge.png" id="17_7hj23"]
 
 [sub_resource type="Curve" id="Curve_tic27"]
-_data = [Vector2(0, 0), 0.0, 2.98794, 0, 0, Vector2(0.251055, 0.728312), 1.11983, 1.11983, 0, 0, Vector2(0.49789, 1), 0.0, 0.0, 0, 0, Vector2(0.751055, 0.712934), -1.14687, -1.14687, 0, 0, Vector2(1, 0), -2.83634, 0.0, 0, 0]
-point_count = 5
+_data = [Vector2(0, 0), 0.0, 2.43565, 0, 0, Vector2(0.352321, 0.697555), 1.48488, 1.48488, 0, 0, Vector2(0.744726, 1), 0.0, 0.0, 0, 0]
+point_count = 3
 
 [sub_resource type="Shader" id="Shader_m2138"]
 code = "shader_type canvas_item;
@@ -600,7 +600,9 @@ animations = [{
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_dhsrb"]
 radius = 9.99972
-height = 94.0124
+height = 100.012
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1drv6"]
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_jn4w2"]
 playback_mode = 1
@@ -1227,6 +1229,12 @@ frame_progress = 1.0
 position = Vector2(0, 30)
 rotation = -0.0075053
 shape = SubResource("CapsuleShape2D_dhsrb")
+disabled = true
+
+[node name="LightningScanCollisionSweetSpot" type="CollisionShape2D" parent="."]
+position = Vector2(0, 47)
+rotation = -0.0075053
+shape = SubResource("CircleShape2D_1drv6")
 disabled = true
 
 [node name="SpawnAudio" type="AudioStreamPlayer2D" parent="."]

@@ -6,6 +6,7 @@ extends Enemy
 @onready var shootAudio1 = $ShootAudio
 @onready var shootAudio2 = $ShootAudio2
 @onready var lightningScanCollision : CollisionShape2D = $LightningScanCollision
+@onready var lightningScanCollisionSweetSpot : CollisionShape2D = $LightningScanCollisionSweetSpot
 @onready var chargeSprite : AnimatedSprite2D = $AimIndicator/ChargeSprite
 @onready var primaryStateMachine = $PrimaryStateMachine
 
@@ -36,8 +37,10 @@ var facing_offset_position:
 
 var charge_sprite_offset = 11.275
 
-var lightning_damage = 4
-var lightning_damage_final_mult = 4
+var lightning_damage = 3
+var lightning_damage_final_mult = 3
+var lightning_damage_sweet_mult = 2
+var lightning_damage_charged_mult = 1.5
 
 var charged_lightning_min_range = 2
 var charged_lightning_max_range = 250
@@ -268,7 +271,7 @@ func create_lightningboltparams():
 class ChargeLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scripts/SkillState.gd":
 	var selfEnemy
 	var charge
-	var range
+	var chargeRange 
 
 	func _onEnter():
 		selfEnemy.play_animation("Charge_Loop")
@@ -282,12 +285,12 @@ class ChargeLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scri
 
 		var clampedAge = clamp(age, 0, selfEnemy.charged_lightning_charge_time)
 		charge = clampedAge/selfEnemy.charged_lightning_charge_time
-		range = lerp(selfEnemy.charged_lightning_min_range, 
+		chargeRange = lerp(selfEnemy.charged_lightning_min_range, 
 							   selfEnemy.charged_lightning_max_range, 
 							   selfEnemy.lightning_distance_curve.sample(charge))
 
-		selfEnemy.chargeSprite.frame = charge * 8
-		selfEnemy.chargeSprite.position.x = range
+		selfEnemy.chargeSprite.frame = 8 if charge >= 0.5 else 1
+		selfEnemy.chargeSprite.position.x = chargeRange
 
 		if !selfEnemy.holding_primary:
 			release()
@@ -297,7 +300,8 @@ class ChargeLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Scri
 	func release():
 		var newState = FireLightning.new()
 		newState.selfEnemy = selfEnemy
-		newState.range = range
+		newState.chargeRange = chargeRange
+		newState.isCharged = charge >= 0.5
 
 		outer.setState(newState)
 	func _onExit():
@@ -314,31 +318,25 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 	var shotsFired = 0
 
 	var scanCollision : CollisionShape2D
+	var scanCollisionSweetSpot : CollisionShape2D
 	var excluded
 	var mask
 	var space_state
 	var query
 	var damage
-	var range
+	var chargeRange = 100 #defaults for AI when not charged
+	var isCharged = false #defaults for AI when not charged
+	
+	var targetEntity = null
+	var isSweet = false
+	var targetPosition
 
 	func _onEnter():
 		selfEnemy.attacking = true
 		selfEnemy.play_animation("Shoot")
 		selfEnemy.apply_effect(EffectType.SPEED_OVERRIDE, selfEnemy, selfEnemy.lightning_walk_speed)
 
-		scanCollision = selfEnemy.lightningScanCollision
-		scanCollision.shape.height = range
-		scanCollision.shape.radius = selfEnemy.lightning_scan_radius
-
-		excluded = selfEnemy.get_node('Hitbox')
-		mask = 4 | Util.bullet_collision_layers[selfEnemy.elevation]
-		
-		space_state = selfEnemy.get_world_2d().direct_space_state
-		query = PhysicsShapeQueryParameters2D.new()
-		query.collide_with_areas = true
-		query.collide_with_bodies = true
-		query.collision_mask = mask
-		query.exclude = [excluded]
+		ScanForTarget()
 
 		if !damage:
 			damage = selfEnemy.lightning_damage
@@ -351,6 +349,51 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 			selfEnemy.lightning_travelTime = 1
 		else:
 			selfEnemy.lightning_travelTime = 0.1
+
+	func ScanForTarget():
+		scanCollision = selfEnemy.lightningScanCollision
+		scanCollision.shape.height = chargeRange + selfEnemy.lightning_scan_radius;
+		scanCollision.shape.radius = selfEnemy.lightning_scan_radius
+
+		scanCollisionSweetSpot = selfEnemy.lightningScanCollisionSweetSpot
+		scanCollisionSweetSpot.shape.radius = selfEnemy.lightning_scan_radius
+
+		excluded = selfEnemy.get_node('Hitbox')
+		mask = 4 | Util.bullet_collision_layers[selfEnemy.elevation]
+		
+		space_state = selfEnemy.get_world_2d().direct_space_state
+		query = PhysicsShapeQueryParameters2D.new()
+		query.collide_with_areas = true
+		query.collide_with_bodies = true
+		query.collision_mask = mask
+		query.exclude = [excluded]
+		
+		targetPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * chargeRange)
+
+		scanCollisionSweetSpot.global_position = targetPosition
+		query.set_shape(scanCollisionSweetSpot.shape)
+		query.transform = scanCollisionSweetSpot.global_transform
+		var resultsSweetSpot = space_state.intersect_shape(query, 512)
+		var targetCastResultSweetSpot = find_best_result(resultsSweetSpot, targetPosition)
+
+		if targetCastResultSweetSpot:
+			targetEntity = targetCastResultSweetSpot
+			isSweet = true
+			return
+
+		var scanPosition = targetPosition + (selfEnemy.aim_direction.normalized() * selfEnemy.lightning_scan_radius)
+
+		scanCollision.global_position = selfEnemy.global_position + (scanPosition - selfEnemy.global_position)/2
+		scanCollision.global_rotation = selfEnemy.aim_direction.angle() + PI*0.5
+		query.set_shape(scanCollision.shape)
+		query.transform = scanCollision.global_transform
+		var results = space_state.intersect_shape(query, 512)
+
+		var targetCastResult = find_best_result(results, targetPosition)
+
+		if targetCastResult:
+			targetEntity = targetCastResult
+
 
 	# attack speed?
 	func _onUpdate(delta):
@@ -375,38 +418,34 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 		
 		# selfEnemy.shootAudio2.play()
 
-		var toPosition = selfEnemy.global_position + (selfEnemy.aim_direction.normalized() * range)
+		var resultPosition = targetEntity.global_position if is_instance_valid(targetEntity) else targetPosition
 
-		var resultPosition = toPosition
-
-		scanCollision.global_position = selfEnemy.global_position + (toPosition - selfEnemy.global_position)/2
-		scanCollision.global_rotation = selfEnemy.aim_direction.angle() + PI*0.5
-		query.set_shape(scanCollision.shape)
-		query.transform = scanCollision.global_transform
-		var results = space_state.intersect_shape(query, 512)
-
-		var targetCastResult = find_best_result(results)
-
-		var entity = null
-		if targetCastResult:
-			entity = targetCastResult
-			resultPosition = entity.global_position
+		var isFinalBolt = shotsFired == shots
 		
 		var startpos = selfEnemy.facing_offset_position
 		var params = LightningBoltParams.new()
 		params.source = selfEnemy
-		params.damage = damage * (selfEnemy.lightning_damage_final_mult if shotsFired == shots else 1) 
+		params.inflictor = selfEnemy
+		params.damage = damage
+		if isFinalBolt:
+			params.damage *= selfEnemy.lightning_damage_final_mult
+		if isSweet:
+			params.damage *= selfEnemy.lightning_damage_sweet_mult
+		if isCharged:
+			params.damage *= selfEnemy.lightning_damage_charged_mult
 		params.travelTime = selfEnemy.lightning_travelTime
 		params.startPosition = startpos
 		params.destination = resultPosition
-		params.target = entity
-		params.remainingBounces = 1
-		params.finalBolt = (shotsFired == shots)
+		params.target = targetEntity
+		params.remainingBounces = 0
+		params.finalBolt = isFinalBolt
 		params.widthMult = damage / selfEnemy.lightning_damage
+		if !isSweet:
+			params.color.a = 0.5
 
 		selfEnemy.fire_lightning(params)
 
-	func find_best_result(results):
+	func find_best_result(results, sweetSpotPosition):
 		var testAttack = Attack.new(selfEnemy)
 		testAttack.add_tag(Attack.Tag.ELECTRIC)
 
@@ -422,10 +461,10 @@ class FireLightning extends "res://mods-unpacked/TheTimesweeper-SillyBots/Script
 			var checkResult = result.collider
 			if checkResult.is_in_group('hitbox'):
 				checkResult = checkResult.get_parent()
-			if !checkResult.has_method('can_be_hit') || !checkResult.can_be_hit(testAttack):
+			if not checkResult is TeslaConductor && (!checkResult.has_method('can_be_hit') || !checkResult.can_be_hit(testAttack)):
 				continue
 			var angle = aimVector.angle_to(checkResult.global_position - selfEnemy.global_position)
-			var position = checkResult.global_position.distance_squared_to(selfEnemy.global_position)
+			var position = checkResult.global_position.distance_squared_to(sweetSpotPosition)
 			var found
 			if(angle < closestAngle + 0.2):
 				if(angle < closestAngle):
@@ -445,12 +484,14 @@ class LightningBoltParams:
 	var source
 	var damage
 	var travelTime
+	var inflictor
 	var startPosition
 	var destination
 	var target
 	var remainingBounces
 	var alreadyBounced = []
 	var finalBolt = false
+	var fromConductor = false
 
 	var color = Color(1, 1, 1, 1)
 	var widthMult = 1
@@ -460,12 +501,14 @@ class LightningBoltParams:
 		dup.source = source
 		dup.damage = damage
 		dup.travelTime = travelTime
+		dup.inflictor = inflictor
 		dup.startPosition = startPosition
 		dup.destination = destination
 		dup.target = target
 		dup.remainingBounces = remainingBounces
 		dup.alreadyBounced = alreadyBounced
 		dup.finalBolt = finalBolt
+		dup.fromConductor = fromConductor
 		dup.color = color
 		dup.widthMult = widthMult
 		return dup
